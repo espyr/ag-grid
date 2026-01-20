@@ -1,0 +1,62 @@
+.topBar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e1e1e1;
+  background: #a19f9d45;
+}
+
+.leftActions {
+  display: flex;
+  gap: 8px;
+}
+
+.secondaryButton {
+  background: white;
+  border: 1px solid #c8c6c4;
+  border-radius: 4px;
+  padding: 6px 14px;
+  gap: 8px;
+  display: flex;
+  cursor: pointer;
+}
+
+.secondaryButton:hover {
+  background: #f3f2f1;
+}
+
+.searchBox input {
+  height: 30px;
+  width: 220px;
+  padding: 0 10px;
+  border-radius: 4px;
+  border: 1px solid #c8c6c4;
+  outline: none;
+}
+
+.searchBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 10px;
+  color: #0f6cbd;
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.searchBox input {
+  height: 30px;
+  width: 240px;
+  padding-left: 32px; /* 👈 space for icon */
+  padding-right: 10px;
+
+  border-radius: 4px;
+  border: 1px solid #c8c6c4;
+  outline: none;
+}
