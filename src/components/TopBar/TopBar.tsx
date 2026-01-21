@@ -1,5 +1,7 @@
 import { Icon } from "@fluentui/react";
 import styles from "./TopBar.module.css";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 export const TopBar: React.FC<{
   selectedRows?: any[];
@@ -7,17 +9,61 @@ export const TopBar: React.FC<{
   setQuickFilterText: (text: string) => void;
 }> = ({ selectedRows, quickFilterText, setQuickFilterText }) => {
   const isButtonVisible = selectedRows && selectedRows.length > 0;
+
+  const handleBulkDownload = async () => {
+    if (!selectedRows?.length) return;
+
+    const zip = new JSZip();
+    const folder = zip.folder("archivos");
+
+    try {
+      for (const item of selectedRows) {
+        const url = item.osp_link;
+        const baseName =
+          item.osp_nombre?.replace(/[^\w\d]+/g, "_") || "archivo";
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const blob = await res.blob();
+
+        // Try to infer extension
+        const type = res.headers.get("content-type") || "";
+        let ext = "";
+        if (type.includes("pdf")) ext = ".pdf";
+        else if (type.includes("png")) ext = ".png";
+        else if (type.includes("jpeg")) ext = ".jpg";
+
+        folder?.file(baseName + ext, blob);
+      }
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      saveAs(zipBlob, "descarga.zip");
+    } catch (e) {
+      console.error("ZIP download failed:", e);
+      alert("No se pudieron descargar los archivos. Posible problema de CORS.");
+    }
+  };
+
   const uploadFile = () => {
     // Lógica para subir el fichero
+    console.log("Subir fichero");
   };
-  const deleteFile = () => {
+  const deleteFiles = () => {
     // Lógica para eliminar el fichero
+    console.log("Eliminar ficheros seleccionados");
+    console.log(selectedRows);
   };
-  const downloadFile = () => {
+  const downloadFiles = () => {
     // Lógica para descargar la documentación
+    console.log("Descargar documentación de ficheros seleccionados");
+    handleBulkDownload();
+    console.log(selectedRows);
   };
-  const openSharePoint = () => {
+  const openSharePoint = (e: React.MouseEvent) => {
     // Lógica para abrir en SharePoint
+    e.preventDefault();
+    window.open("https://www.google.com", "_blank");
   };
   return (
     <div className={styles.topBar}>
@@ -34,7 +80,7 @@ export const TopBar: React.FC<{
         {isButtonVisible && (
           <button
             className={styles.secondaryButton}
-            onClick={() => deleteFile()}
+            onClick={() => deleteFiles()}
           >
             <Icon iconName="Delete" />
             Eliminar fichero
@@ -43,7 +89,7 @@ export const TopBar: React.FC<{
         {isButtonVisible && (
           <button
             className={styles.secondaryButton}
-            onClick={() => downloadFile()}
+            onClick={() => downloadFiles()}
           >
             <Icon iconName="Download" />
             Descargar Documentación
@@ -51,8 +97,8 @@ export const TopBar: React.FC<{
         )}
         <button
           className={styles.secondaryButton}
-          onClick={() => {
-            openSharePoint();
+          onClick={(e) => {
+            openSharePoint(e);
           }}
         >
           <Icon iconName="OpenInNewWindow" />

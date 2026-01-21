@@ -11,11 +11,10 @@ interface Props {
 export const NombreCellRenderer: React.FC<Props> = ({ value, data }) => {
   const [open, setOpen] = useState(false);
   const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(
-    null
+    null,
   );
 
   const buttonRef = useRef<HTMLButtonElement>(null);
-
   const onLinkClick = (e: React.MouseEvent) => {
     e.preventDefault();
     window.open("https://www.google.com", "_blank");
@@ -85,7 +84,7 @@ export const NombreCellRenderer: React.FC<Props> = ({ value, data }) => {
               Actualizar fichero
             </div>
           </div>,
-          document.body
+          document.body,
         )}
     </div>
   );
