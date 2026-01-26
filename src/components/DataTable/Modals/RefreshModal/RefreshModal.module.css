@@ -1,0 +1,89 @@
+/* Dark overlay that covers the whole screen */
+.modalBackdrop {
+  position: fixed;
+  inset: 0; /* top:0 right:0 bottom:0 left:0 */
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 2000; /* higher than table + menus */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* White modal box */
+.modalContent {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  min-width: 320px;
+  max-width: 90vw;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Buttons */
+.modalContent button {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.modalContent button:first-of-type {
+  background: #0078d4; /* Fluent blue */
+  color: white;
+}
+
+.modalContent button:last-of-type {
+  background: #e0e0e0;
+  color: #333;
+}
+/* Footer buttons */
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.primaryBtn {
+  background: #0f6cbd;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 20px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.primaryBtn:hover {
+  background: #115ea3;
+}
+
+.primaryBtn:disabled {
+  background: #c8c6c4;
+  cursor: not-allowed;
+}
+
+.secondaryBtn {
+  background: white;
+  color: #323130;
+  border: 1px solid #8a8886;
+  border-radius: 4px;
+  padding: 8px 20px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.secondaryBtn:hover {
+  background: #f3f2f1;
+}
+
+/* Error message */
+.error {
+  color: #c50f1f;
+  font-size: 13px;
+  margin-top: 4px;
+}

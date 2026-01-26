@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { formatInTimeZone } from "date-fns-tz";
 import { parseISO } from "date-fns";
 import type { SelectionChangedEvent } from "ag-grid-community";
@@ -18,7 +24,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 
 import { AgGridReact } from "ag-grid-react";
-import { getData } from "../../data";
+import { getData, RawDataItem } from "../../data";
 import { columns } from "./DataTableConfig";
 import styles from "./DataTable.module.css";
 import { TopBar } from "../TopBar/TopBar";
@@ -50,14 +56,22 @@ export const DataTable: React.FC<Props> = ({
       ...row,
       createdon: row.createdon ? new Date(row.createdon) : null,
       modifiedon: row.modifiedon ? new Date(row.modifiedon) : null,
-    }))
+    })),
   );
   const [quickFilterText, setQuickFilterText] = useState("");
-  const [selectedRows, setSelectedRows] = useState<any[]>([]);
+  const [selectedRows, setSelectedRows] = useState<RawDataItem[]>([]);
 
   const gridRef = useRef<AgGridReact>(null);
 
-  const colDefs = useMemo<ColDef[]>(() => columns, []);
+  const refreshData = useCallback(() => {
+    const newData = getData().map((row) => ({
+      ...row,
+      createdon: row.createdon ? new Date(row.createdon) : null,
+      modifiedon: row.modifiedon ? new Date(row.modifiedon) : null,
+    }));
+    setRowData(newData);
+  }, []);
+  const colDefs = useMemo<ColDef[]>(() => columns(refreshData), []);
 
   const defaultColDef = useMemo<ColDef>(
     () => ({
@@ -67,12 +81,12 @@ export const DataTable: React.FC<Props> = ({
       resizable: true,
       cellStyle: { justifyContent: "center" },
     }),
-    []
+    [],
   );
 
   const getRowId = useCallback<GetRowIdFunc>(
     ({ data: { id } }: GetRowIdParams) => id,
-    []
+    [],
   );
 
   const themeClass = `${gridTheme}${isDarkMode ? "-dark" : ""}`;
@@ -81,6 +95,12 @@ export const DataTable: React.FC<Props> = ({
     setSelectedRows(selectedRows);
     console.log(selectedRows);
   }, []);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshData();
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [refreshData]);
   return (
     <div
       style={gridHeight ? { height: gridHeight } : {}}
@@ -92,6 +112,7 @@ export const DataTable: React.FC<Props> = ({
         quickFilterText={quickFilterText}
         setQuickFilterText={setQuickFilterText}
         selectedRows={selectedRows}
+        refreshData={refreshData}
       />
       <AgGridReact
         theme="legacy"
@@ -110,6 +131,7 @@ export const DataTable: React.FC<Props> = ({
           headerCheckbox: true,
           enableClickSelection: false,
         }}
+        domLayout="autoHeight"
       />
     </div>
   );

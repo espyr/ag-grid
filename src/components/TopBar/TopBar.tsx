@@ -3,13 +3,15 @@ import styles from "./TopBar.module.css";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { useState } from "react";
-import { UploadModal } from "../UploadModal/UploadModal";
+import { UploadModal } from "../DataTable/Modals/UploadModal/UploadModal";
+import { RawDataItem } from "../../data";
 
 export const TopBar: React.FC<{
-  selectedRows?: any[];
+  selectedRows?: RawDataItem[];
   quickFilterText: string;
   setQuickFilterText: (text: string) => void;
-}> = ({ selectedRows, quickFilterText, setQuickFilterText }) => {
+  refreshData?: () => void;
+}> = ({ selectedRows, quickFilterText, setQuickFilterText, refreshData }) => {
   const isButtonVisible = selectedRows && selectedRows.length > 0;
   const [isOpenModal, setIsOpenModal] = useState(false);
   const handleBulkDownload = async () => {
@@ -48,14 +50,13 @@ export const TopBar: React.FC<{
   };
 
   const uploadFile = () => {
-    // Lógica para subir el fichero
-    console.log("Subir fichero");
     setIsOpenModal(true);
   };
   const deleteFiles = () => {
-    // Lógica para eliminar el fichero
     console.log("Eliminar ficheros seleccionados");
     console.log(selectedRows);
+    console.log("refreshData called");
+    refreshData?.();
   };
   const downloadFiles = () => {
     // Lógica para descargar la documentación

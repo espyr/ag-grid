@@ -2,14 +2,25 @@ import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import styles from "./NombreCellRenderer.module.css";
 import { Icon } from "@fluentui/react";
+import { EditModal } from "../components/DataTable/Modals/EditModal/EditModal";
+import { RefreshModal } from "../components/DataTable/Modals/RefreshModal/RefreshModal";
+import { RawDataItem } from "../data";
 
 interface Props {
   value: string;
-  data: any;
+  data: RawDataItem;
+  refreshData?: () => void;
 }
 
-export const NombreCellRenderer: React.FC<Props> = ({ value, data }) => {
-  const [open, setOpen] = useState(false);
+export const NombreCellRenderer: React.FC<Props> = ({
+  value,
+  data,
+  refreshData,
+}) => {
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [rowData, setRowData] = useState<RawDataItem | null>(null);
+  const [refreshOpen, setRefreshOpen] = useState(false);
   const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(
     null,
   );
@@ -19,8 +30,18 @@ export const NombreCellRenderer: React.FC<Props> = ({ value, data }) => {
     e.preventDefault();
     window.open("https://www.google.com", "_blank");
   };
-
+  const handleEdit = () => {
+    console.log("Editar clicked", data.osp_documentacionid);
+    setOptionsOpen(false);
+    setEditOpen(true);
+  };
+  const handleRefresh = () => {
+    console.log("Actualizar fichero clicked", data.osp_documentacionid);
+    setOptionsOpen(false);
+    setRefreshOpen(true);
+  };
   const toggleMenu = (e: React.MouseEvent) => {
+    setRowData(data);
     e.stopPropagation();
 
     if (!buttonRef.current) return;
@@ -32,18 +53,18 @@ export const NombreCellRenderer: React.FC<Props> = ({ value, data }) => {
       top: rect.bottom + 6,
       left: rect.left,
     });
-    setOpen((prev) => !prev);
+    setOptionsOpen((prev) => !prev);
   };
 
-  // Close when clicking outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
-        setOpen(false);
+        setOptionsOpen(false);
       }
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
   }, []);
 
   return (
@@ -59,9 +80,27 @@ export const NombreCellRenderer: React.FC<Props> = ({ value, data }) => {
       >
         <Icon iconName="MoreVertical" />
       </button>
+      {editOpen &&
+        createPortal(
+          <EditModal
+            rowData={data}
+            onClose={() => setEditOpen(false)}
+            refreshData={refreshData}
+          />,
+          document.body,
+        )}
 
+      {refreshOpen &&
+        createPortal(
+          <RefreshModal
+            rowData={rowData}
+            onClose={() => setRefreshOpen(false)}
+            refreshData={refreshData}
+          />,
+          document.body,
+        )}
       {/* Floating menu */}
-      {open &&
+      {optionsOpen &&
         menuPos &&
         createPortal(
           <div
@@ -72,14 +111,24 @@ export const NombreCellRenderer: React.FC<Props> = ({ value, data }) => {
               left: menuPos.left,
             }}
           >
-            <div className={styles.menuItem}>
+            <div
+              className={styles.menuItem}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit();
+              }}
+            >
+              {" "}
               <Icon iconName="ViewList" />
               Editar
             </div>
-            <div className={styles.menuItem}>
-              <Icon iconName="Rename" /> Cambiar nombre
-            </div>
-            <div className={styles.menuItem}>
+            <div
+              className={styles.menuItem}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRefresh();
+              }}
+            >
               <Icon iconName="Refresh" />
               Actualizar fichero
             </div>

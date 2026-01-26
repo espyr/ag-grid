@@ -1,6 +1,5 @@
 import { useRef } from "react";
-import styles from "./UploadModal.module.css";
-
+import styles from "./FileUploader.module.css";
 interface FileUploaderProps {
   file: File | null;
   setFile: (file: File | null) => void;
@@ -53,7 +52,8 @@ export const FileUploader = ({
     setBase64(encoded);
     setErrors({ ...errors, file: "" });
 
-    const exists = true;
+    const exists = onFileExists && (await checkIfFileExists(selectedFile.name));
+    //const exists = true; // For testing purposes
     setLoading(false);
 
     if (exists && onFileExists) {

@@ -4,10 +4,10 @@ import {
   tipificacionOptions,
   categoriaOptions,
   subcategoriaOptions,
-} from "../../dataOptions";
-import { FileUploader } from "./FileUploader";
+} from "../../../../dataOptions";
+import { FileUploader } from "../../components/FileUploader";
 import toast from "react-hot-toast";
-import { ReplaceModal } from "./ReplaceModal";
+import { ReplaceModal } from "../ReplaceModal/ReplaceModal";
 
 interface UploadModalProps {
   setIsOpenModal: (isOpen: boolean) => void;
@@ -16,12 +16,22 @@ interface UploadModalProps {
 interface ErrorState {
   [key: string]: string;
 }
-
+export interface UploadFile {
+  id?: string;
+  nombre?: string;
+  descripcion?: string;
+  tipificacion?: number | null;
+  categoria?: number | null;
+  subcategoria?: number | null;
+  fileName?: string;
+  contentType?: string;
+  base64?: string;
+}
 export const UploadModal = ({ setIsOpenModal }: UploadModalProps) => {
   const [descripcion, setDescripcion] = useState("");
-  const [tipificacion, setTipificacion] = useState<number | "">("");
-  const [categoria, setCategoria] = useState<number | "">("");
-  const [subcategoria, setSubcategoria] = useState<number | "">("");
+  const [tipificacion, setTipificacion] = useState<number | null>(null);
+  const [categoria, setCategoria] = useState<number | null>(null);
+  const [subcategoria, setSubcategoria] = useState<number | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [base64, setBase64] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -38,32 +48,32 @@ export const UploadModal = ({ setIsOpenModal }: UploadModalProps) => {
   const [showReplaceModal, setShowReplaceModal] = useState(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
-
+  console.log("Render UploadModal", loading);
   // Load categories/subcategories dynamically
   useEffect(() => {
-    if (tipificacion === "") {
+    if (tipificacion === null) {
       setCategoriasDisponibles([]);
-      setCategoria("");
-      setSubcategoria("");
+      setCategoria(null);
+      setSubcategoria(null);
       setSubcategoriasDisponibles([]);
       return;
     }
     const cats = categoriaOptions[tipificacion] ?? [];
     setCategoriasDisponibles(cats);
-    setCategoria("");
-    setSubcategoria("");
+    setCategoria(null);
+    setSubcategoria(null);
     setSubcategoriasDisponibles([]);
   }, [tipificacion]);
 
   useEffect(() => {
-    if (categoria === "") {
+    if (categoria === null) {
       setSubcategoriasDisponibles([]);
-      setSubcategoria("");
+      setSubcategoria(null);
       return;
     }
     const subs = subcategoriaOptions[categoria] ?? [];
     setSubcategoriasDisponibles(subs);
-    setSubcategoria("");
+    setSubcategoria(null);
   }, [categoria]);
 
   // Close modal on outside click
@@ -77,7 +87,7 @@ export const UploadModal = ({ setIsOpenModal }: UploadModalProps) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [setIsOpenModal]);
 
-  const uploadFile = async (payload: any) => {
+  const uploadFile = async (payload: UploadFile) => {
     const toastId = toast.loading("Subiendo fichero...");
     try {
       const res = await fetch("/api/upload", {
@@ -110,7 +120,7 @@ export const UploadModal = ({ setIsOpenModal }: UploadModalProps) => {
     }
 
     setLoading(true);
-    const payload = {
+    const payload: UploadFile = {
       descripcion,
       tipificacion,
       categoria,
@@ -162,7 +172,7 @@ export const UploadModal = ({ setIsOpenModal }: UploadModalProps) => {
             Tipificación <span className={styles.required}>*</span>
           </label>
           <select
-            value={tipificacion}
+            value={tipificacion ?? ""}
             onChange={(e) => {
               setTipificacion(Number(e.target.value));
               setErrors({ ...errors, tipificacion: "" });
@@ -181,7 +191,7 @@ export const UploadModal = ({ setIsOpenModal }: UploadModalProps) => {
 
           <label>Categoría</label>
           <select
-            value={categoria}
+            value={categoria ?? ""}
             onChange={(e) => setCategoria(Number(e.target.value))}
             disabled={!tipificacion || categoriasDisponibles.length === 0}
           >
@@ -195,7 +205,7 @@ export const UploadModal = ({ setIsOpenModal }: UploadModalProps) => {
 
           <label>Subcategoría</label>
           <select
-            value={subcategoria}
+            value={subcategoria ?? ""}
             onChange={(e) => setSubcategoria(Number(e.target.value))}
             disabled={!categoria || subcategoriasDisponibles.length === 0}
           >

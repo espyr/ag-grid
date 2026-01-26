@@ -24,13 +24,16 @@ export const getByTextByKey = (
   }
   return undefined;
 };
-export const columns: ColDef[] = [
+export const columns = (refreshData: () => void): ColDef[] => [
   {
     field: "osp_nombre",
     headerName: "Nombre",
     minWidth: 150,
     resizable: true,
     cellRenderer: NombreCellRenderer,
+    cellRendererParams: {
+      refreshData,
+    },
     getQuickFilterText: (params) => {
       return params.value ?? "";
     },
