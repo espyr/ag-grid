@@ -2,6 +2,8 @@ import { Icon } from "@fluentui/react";
 import styles from "./TopBar.module.css";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import { useState } from "react";
+import { UploadModal } from "../UploadModal/UploadModal";
 
 export const TopBar: React.FC<{
   selectedRows?: any[];
@@ -9,7 +11,7 @@ export const TopBar: React.FC<{
   setQuickFilterText: (text: string) => void;
 }> = ({ selectedRows, quickFilterText, setQuickFilterText }) => {
   const isButtonVisible = selectedRows && selectedRows.length > 0;
-
+  const [isOpenModal, setIsOpenModal] = useState(false);
   const handleBulkDownload = async () => {
     if (!selectedRows?.length) return;
 
@@ -48,6 +50,7 @@ export const TopBar: React.FC<{
   const uploadFile = () => {
     // Lógica para subir el fichero
     console.log("Subir fichero");
+    setIsOpenModal(true);
   };
   const deleteFiles = () => {
     // Lógica para eliminar el fichero
@@ -106,7 +109,6 @@ export const TopBar: React.FC<{
         </button>
       </div>
 
-      {/* Right search */}
       <div className={styles.searchBox}>
         <Icon iconName="Search" className={styles.searchIcon} />
         <input
@@ -118,6 +120,7 @@ export const TopBar: React.FC<{
           }}
         />
       </div>
+      {isOpenModal && <UploadModal setIsOpenModal={setIsOpenModal} />}
     </div>
   );
 };
