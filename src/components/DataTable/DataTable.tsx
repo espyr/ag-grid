@@ -24,10 +24,11 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 
 import { AgGridReact } from "ag-grid-react";
-import { getData, RawDataItem } from "../../data";
+import { RawDataItem } from "../../data";
 import { columns } from "./DataTableConfig";
 import styles from "./DataTable.module.css";
 import { TopBar } from "../TopBar/TopBar";
+import { getDocumentacionData } from "../../osp_funciones_documentacion";
 export interface Props {
   gridTheme?: string;
   isDarkMode?: boolean;
@@ -52,7 +53,7 @@ export const DataTable: React.FC<Props> = ({
   gridHeight = null,
 }) => {
   const [rowData, setRowData] = useState(
-    getData().map((row) => ({
+    getDocumentacionData().map((row: RawDataItem) => ({
       ...row,
       createdon: row.createdon ? new Date(row.createdon) : null,
       modifiedon: row.modifiedon ? new Date(row.modifiedon) : null,
@@ -64,7 +65,7 @@ export const DataTable: React.FC<Props> = ({
   const gridRef = useRef<AgGridReact>(null);
 
   const refreshData = useCallback(() => {
-    const newData = getData().map((row) => ({
+    const newData = getDocumentacionData().map((row: RawDataItem) => ({
       ...row,
       createdon: row.createdon ? new Date(row.createdon) : null,
       modifiedon: row.modifiedon ? new Date(row.modifiedon) : null,

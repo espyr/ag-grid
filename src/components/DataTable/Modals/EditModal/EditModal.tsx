@@ -18,12 +18,14 @@ export const EditModal = ({
   refreshData?: () => void;
 }) => {
   const [descripcion, setDescripcion] = useState<string>(
-    rowData ? rowData.osp_descripcion : "",
+    rowData.osp_descripcion ? rowData.osp_descripcion : "",
   );
   const [tipificacion, setTipificacion] = useState<number>(
-    rowData.osp_tipificacion,
+    rowData.osp_tipificacion || 0,
   );
-  const [categoria, setCategoria] = useState<number>(rowData.osp_categoria);
+  const [categoria, setCategoria] = useState<number>(
+    rowData.osp_categoria || 0,
+  );
   const [subcategoria, setSubcategoria] = useState<number | null>(
     rowData ? rowData.osp_subcategoria : null,
   );
