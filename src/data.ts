@@ -18,16 +18,19 @@ export interface RawDataItem {
   osp_subcategoria: number | null;
   osp_validadocontratacion: boolean;
   osp_validadoordering: boolean;
-
+  "_ownerid_value@OData.Community.Display.V1.FormattedValue"?: string;
+  "createdon@OData.Community.Display.V1.FormattedValue"?: string;
   "osp_categoria@OData.Community.Display.V1.FormattedValue"?: string;
   "osp_tipificacion@OData.Community.Display.V1.FormattedValue"?: string;
   "osp_validadocontratacion@OData.Community.Display.V1.FormattedValue"?: string;
   "osp_validadoordering@OData.Community.Display.V1.FormattedValue"?: string;
-
+  "modifiedon@OData.Community.Display.V1.FormattedValue"?: string;
   "_modifiedby_value@Microsoft.Dynamics.CRM.lookuplogicalname"?: string;
   "_osp_oportunidad_value@Microsoft.Dynamics.CRM.associatednavigationproperty"?: string;
   "_osp_oportunidad_value@Microsoft.Dynamics.CRM.lookuplogicalname"?: string;
   "_osp_oportunidad_value@OData.Community.Display.V1.FormattedValue"?: string;
   "_ownerid_value@Microsoft.Dynamics.CRM.associatednavigationproperty"?: string;
   "_ownerid_value@Microsoft.Dynamics.CRM.lookuplogicalname"?: string;
+  "osp_proyecto@OData.Community.Display.V1.FormattedValue"?: string;
+  "_modifiedby_value@OData.Community.Display.V1.FormattedValue"?: string;
 }
