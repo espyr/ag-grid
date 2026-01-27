@@ -220,7 +220,6 @@ export const UploadModal = ({
               </option>
             ))}
           </select>
-
           <FileUploader
             file={file}
             setFile={setFile}
@@ -230,7 +229,6 @@ export const UploadModal = ({
             setLoading={setLoading}
             onFileExists={handleFileExists}
           />
-
           <div className={styles.footer}>
             <button type="submit" className={styles.primaryBtn}>
               Guardar

@@ -99,12 +99,6 @@ export const EditModal = ({
         <form onSubmit={handleSubmit}>
           <label>Nombre</label>
           <input value={nombre} onChange={(e) => setNombre(e.target.value)} />
-          <label>Descripción</label>
-          <textarea
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-          />
-
           <label>
             Tipificación <span className={styles.required}>*</span>
           </label>
@@ -153,7 +147,11 @@ export const EditModal = ({
               </option>
             ))}
           </select>
-
+          <label>Descripción</label>
+          <textarea
+            value={descripcion}
+            onChange={(e) => setDescripcion(e.target.value)}
+          />
           <div className={styles.footer}>
             <button type="submit" className={styles.primaryBtn}>
               Guardar
