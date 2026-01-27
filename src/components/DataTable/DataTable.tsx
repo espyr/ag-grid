@@ -55,7 +55,7 @@ export const DataTable: React.FC<Props> = ({
   );
   const [quickFilterText, setQuickFilterText] = useState("");
   const [selectedRows, setSelectedRows] = useState<RawDataItem[]>([]);
-
+  const [openMenuRowId, setOpenMenuRowId] = useState<string | null>(null);
   const gridRef = useRef<AgGridReact>(null);
   const updateRevisado = async (id: string, revisado: boolean) => {
     const payload = rowData.find((row) => row.osp_documentacionid === id);
@@ -84,7 +84,7 @@ export const DataTable: React.FC<Props> = ({
     setRowData(newData);
   }, []);
   const colDefs = useMemo<ColDef[]>(
-    () => columns(refreshData, updateRevisado),
+    () => columns(refreshData, updateRevisado, openMenuRowId, setOpenMenuRowId),
     [],
   );
 

@@ -6,6 +6,7 @@ import {
   tipificacionOptions,
 } from "../../dataOptions";
 import { NombreCellRenderer } from "../../renders/NombreCellRenderer";
+import { Dispatch, SetStateAction } from "react";
 
 const formatDate = (fechaCadena: string | null | undefined): string => {
   if (!fechaCadena) return "";
@@ -27,6 +28,8 @@ export const getByTextByKey = (
 export const columns = (
   refreshData: () => void,
   updateRevisado: (id: string, value: boolean) => void,
+  openMenuRowId: string | null,
+  setOpenMenuRowId: Dispatch<SetStateAction<string | null>>,
 ): ColDef[] => [
   {
     field: "osp_nombre",
@@ -36,6 +39,8 @@ export const columns = (
     cellRenderer: NombreCellRenderer,
     cellRendererParams: {
       refreshData,
+      openMenuRowId,
+      setOpenMenuRowId,
     },
     getQuickFilterText: (params) => {
       return params.value ?? "";

@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import styles from "./NombreCellRenderer.module.css";
 import { Icon } from "@fluentui/react";
@@ -10,34 +16,39 @@ interface Props {
   value: string;
   data: RawDataItem;
   refreshData?: () => void;
+  openMenuRowId: string | null;
+  setOpenMenuRowId: Dispatch<SetStateAction<string | null>>;
 }
 
 export const NombreCellRenderer: React.FC<Props> = ({
   value,
   data,
   refreshData,
+  openMenuRowId,
+  setOpenMenuRowId,
 }) => {
-  const [optionsOpen, setOptionsOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [rowData, setRowData] = useState<RawDataItem | null>(null);
   const [refreshOpen, setRefreshOpen] = useState(false);
-  const [isFilePT, setIsFilePT] = useState(false);
   const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(
     null,
   );
+  const isFilePT = data.osp_tipificacion === 863920001;
   const buttonRef = useRef<HTMLButtonElement>(null);
   const onLinkClick = (e: React.MouseEvent) => {
     e.preventDefault();
     window.open("https://www.google.com", "_blank");
   };
+  const isOpen = openMenuRowId === data.osp_documentacionid;
+
   const handleEdit = () => {
     console.log("Editar clicked", data.osp_documentacionid);
-    setOptionsOpen(false);
+    setOpenMenuRowId(null);
     setEditOpen(true);
   };
   const handleRefresh = () => {
     console.log("Actualizar fichero clicked", data.osp_documentacionid);
-    setOptionsOpen(false);
+    setOpenMenuRowId(null);
     setRefreshOpen(true);
   };
   const toggleMenu = (e: React.MouseEvent) => {
@@ -45,7 +56,6 @@ export const NombreCellRenderer: React.FC<Props> = ({
     e.stopPropagation();
 
     if (!buttonRef.current) return;
-
     const rect = buttonRef.current.getBoundingClientRect();
 
     // 🔥 Calculate position JUST AFTER the button
@@ -53,15 +63,15 @@ export const NombreCellRenderer: React.FC<Props> = ({
       top: rect.bottom + 6,
       left: rect.left,
     });
-    setOptionsOpen((prev) => !prev);
+    setOpenMenuRowId((prev) =>
+      prev === data.osp_documentacionid ? null : data.osp_documentacionid,
+    );
   };
 
   useEffect(() => {
-    //TODO: comprobar si el fichero es de tipo PT
-    setIsFilePT(false);
     const handler = (e: MouseEvent) => {
       if (buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
-        setOptionsOpen(false);
+        setOpenMenuRowId(null);
       }
     };
 
@@ -102,7 +112,7 @@ export const NombreCellRenderer: React.FC<Props> = ({
           document.body,
         )}
       {/* Floating menu */}
-      {optionsOpen &&
+      {isOpen &&
         menuPos &&
         createPortal(
           <div
@@ -116,6 +126,7 @@ export const NombreCellRenderer: React.FC<Props> = ({
             <div
               className={styles.menuItem}
               onClick={(e) => {
+                setOpenMenuRowId(null);
                 e.stopPropagation();
                 handleEdit();
               }}
@@ -124,16 +135,18 @@ export const NombreCellRenderer: React.FC<Props> = ({
               <Icon iconName="ViewList" />
               Editar
             </div>
-            <div
-              className={`${styles.menuItem} ${isFilePT ? styles.disabled : ""}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRefresh();
-              }}
-            >
-              <Icon iconName="Refresh" />
-              Actualizar fichero
-            </div>
+            {isFilePT && (
+              <div
+                className={styles.menuItem}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRefresh();
+                }}
+              >
+                <Icon iconName="Refresh" />
+                Reemplazar fichero
+              </div>
+            )}
           </div>,
           document.body,
         )}

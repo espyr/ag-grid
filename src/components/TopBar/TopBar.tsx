@@ -5,6 +5,7 @@ import { saveAs } from "file-saver";
 import { useState } from "react";
 import { UploadModal } from "../DataTable/Modals/UploadModal/UploadModal";
 import { RawDataItem } from "../../data";
+import { getUrlSharepoint } from "../../osp_funciones_documentacion";
 
 export const TopBar: React.FC<{
   selectedRows?: RawDataItem[];
@@ -14,6 +15,7 @@ export const TopBar: React.FC<{
 }> = ({ selectedRows, quickFilterText, setQuickFilterText, refreshData }) => {
   const isButtonVisible = selectedRows && selectedRows.length > 0;
   const [isOpenModal, setIsOpenModal] = useState(false);
+  const isAdmin = true; // TODO: Replace with actual admin check
   const handleBulkDownload = async () => {
     if (!selectedRows?.length) return;
 
@@ -65,9 +67,9 @@ export const TopBar: React.FC<{
     console.log(selectedRows);
   };
   const openSharePoint = (e: React.MouseEvent) => {
-    // Lógica para abrir en SharePoint
     e.preventDefault();
-    window.open("https://www.google.com", "_blank");
+    const sharePointLink = getUrlSharepoint();
+    window.open(sharePointLink, "_blank");
   };
   return (
     <div className={styles.topBar}>
@@ -81,7 +83,7 @@ export const TopBar: React.FC<{
             Subir Fichero
           </button>
         )}
-        {isButtonVisible && (
+        {isButtonVisible && isAdmin && (
           <button
             className={styles.secondaryButton}
             onClick={() => deleteFiles()}
