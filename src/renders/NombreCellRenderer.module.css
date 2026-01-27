@@ -86,3 +86,8 @@
 .menuItem:hover {
   background-color: #f3f2f1;
 }
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none; /* optional, extra safety */
+}

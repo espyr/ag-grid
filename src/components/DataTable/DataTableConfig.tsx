@@ -24,7 +24,10 @@ export const getByTextByKey = (
   }
   return undefined;
 };
-export const columns = (refreshData: () => void): ColDef[] => [
+export const columns = (
+  refreshData: () => void,
+  updateRevisado: (id: string, value: boolean) => void,
+): ColDef[] => [
   {
     field: "osp_nombre",
     headerName: "Nombre",
@@ -88,7 +91,18 @@ export const columns = (refreshData: () => void): ColDef[] => [
     editable: true,
     cellStyle: { justifyContent: "center", display: "flex" },
     getQuickFilterText: () => "",
+    onCellValueChanged: (params) => {
+      const newValue = params.newValue;
+      const oldValue = params.oldValue;
+      const row = params.data;
+
+      if (newValue !== oldValue) {
+        console.log("Revisado changed:", newValue, row);
+        updateRevisado(row.osp_documentacionid, newValue);
+      }
+    },
   },
+
   {
     field: "_ownerid",
     headerName: "Creado por",

@@ -11,12 +11,13 @@ import { ReplaceModal } from "../ReplaceModal/ReplaceModal";
 
 interface UploadModalProps {
   setIsOpenModal: (isOpen: boolean) => void;
+  refreshData?: () => void;
 }
 
 interface ErrorState {
   [key: string]: string;
 }
-export interface UploadFile {
+export interface UploadFilePayload {
   id?: string;
   nombre?: string;
   descripcion?: string;
@@ -27,7 +28,10 @@ export interface UploadFile {
   contentType?: string;
   base64?: string;
 }
-export const UploadModal = ({ setIsOpenModal }: UploadModalProps) => {
+export const UploadModal = ({
+  setIsOpenModal,
+  refreshData,
+}: UploadModalProps) => {
   const [descripcion, setDescripcion] = useState("");
   const [tipificacion, setTipificacion] = useState<number | null>(null);
   const [categoria, setCategoria] = useState<number | null>(null);
@@ -42,7 +46,6 @@ export const UploadModal = ({ setIsOpenModal }: UploadModalProps) => {
     { key: number; text: string }[]
   >([]);
   const [errors, setErrors] = useState<ErrorState | null>(null);
-
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingBase64, setPendingBase64] = useState<string | null>(null);
   const [showReplaceModal, setShowReplaceModal] = useState(false);
@@ -87,7 +90,7 @@ export const UploadModal = ({ setIsOpenModal }: UploadModalProps) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [setIsOpenModal]);
 
-  const uploadFile = async (payload: UploadFile) => {
+  const uploadFile = async (payload: UploadFilePayload) => {
     const toastId = toast.loading("Subiendo fichero...");
     try {
       const res = await fetch("/api/upload", {
@@ -97,6 +100,7 @@ export const UploadModal = ({ setIsOpenModal }: UploadModalProps) => {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       toast.success("Archivo subido con éxito", { id: toastId });
+      refreshData?.();
       setIsOpenModal(false);
     } catch (err) {
       console.error("Upload failed:", err);
@@ -120,7 +124,7 @@ export const UploadModal = ({ setIsOpenModal }: UploadModalProps) => {
     }
 
     setLoading(true);
-    const payload: UploadFile = {
+    const payload: UploadFilePayload = {
       descripcion,
       tipificacion,
       categoria,

@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { FileUploader } from "../../components/FileUploader";
 import styles from "./RefreshModal.module.css";
 import { RawDataItem } from "../../../../data";
 import { toast } from "react-hot-toast";
-import { UploadFile } from "../UploadModal/UploadModal";
+import { UploadFilePayload } from "../UploadModal/UploadModal";
 interface ErrorState {
   [key: string]: string;
 }
@@ -20,7 +20,9 @@ export const RefreshModal = ({
   const [file, setFile] = useState<File | null>(null);
   const [base64, setBase64] = useState<string | null>(null);
   const [errors, setErrors] = useState<ErrorState | null>(null);
-  const uploadFile = async (payload: UploadFile) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  const uploadFile = async (payload: UploadFilePayload) => {
     const toastId = toast.loading("Subiendo fichero...");
     try {
       const res = await fetch("/api/upload", {
@@ -59,10 +61,19 @@ export const RefreshModal = ({
     refreshData?.();
     onClose();
   };
-
+  // Close modal on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [onClose]);
   return (
     <div className={styles.modalBackdrop}>
-      <div className={styles.modalContent}>
+      <div className={styles.modalContent} ref={modalRef}>
         <h3 style={{ margin: 0 }}>Actualizar Archivo:</h3>
         <span>{rowData?.osp_nombre}</span>
 

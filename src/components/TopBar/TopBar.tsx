@@ -121,7 +121,12 @@ export const TopBar: React.FC<{
           }}
         />
       </div>
-      {isOpenModal && <UploadModal setIsOpenModal={setIsOpenModal} />}
+      {isOpenModal && (
+        <UploadModal
+          setIsOpenModal={setIsOpenModal}
+          refreshData={refreshData}
+        />
+      )}
     </div>
   );
 };

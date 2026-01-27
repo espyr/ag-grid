@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { formatInTimeZone } from "date-fns-tz";
 import { parseISO } from "date-fns";
 import type { SelectionChangedEvent } from "ag-grid-community";
@@ -63,7 +57,24 @@ export const DataTable: React.FC<Props> = ({
   const [selectedRows, setSelectedRows] = useState<RawDataItem[]>([]);
 
   const gridRef = useRef<AgGridReact>(null);
+  const updateRevisado = async (id: string, revisado: boolean) => {
+    const payload = rowData.find((row) => row.osp_documentacionid === id);
+    const newPayload = { ...payload, osp_revisado: revisado };
+    console.log("newPayload:", newPayload);
 
+    try {
+      const res = await fetch("/api/updateRevisado", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newPayload),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      console.log("Revisado updated successfully");
+      refreshData();
+    } catch (err) {
+      console.error("Failed to update Revisado:", err);
+    }
+  };
   const refreshData = useCallback(() => {
     const newData = getDocumentacionData().map((row: RawDataItem) => ({
       ...row,
@@ -72,7 +83,10 @@ export const DataTable: React.FC<Props> = ({
     }));
     setRowData(newData);
   }, []);
-  const colDefs = useMemo<ColDef[]>(() => columns(refreshData), []);
+  const colDefs = useMemo<ColDef[]>(
+    () => columns(refreshData, updateRevisado),
+    [],
+  );
 
   const defaultColDef = useMemo<ColDef>(
     () => ({
@@ -96,12 +110,7 @@ export const DataTable: React.FC<Props> = ({
     setSelectedRows(selectedRows);
     console.log(selectedRows);
   }, []);
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refreshData();
-    }, 60000);
-    return () => clearInterval(interval);
-  }, [refreshData]);
+
   return (
     <div
       style={gridHeight ? { height: gridHeight } : {}}

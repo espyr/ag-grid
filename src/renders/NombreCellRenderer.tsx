@@ -21,10 +21,10 @@ export const NombreCellRenderer: React.FC<Props> = ({
   const [editOpen, setEditOpen] = useState(false);
   const [rowData, setRowData] = useState<RawDataItem | null>(null);
   const [refreshOpen, setRefreshOpen] = useState(false);
+  const [isFilePT, setIsFilePT] = useState(false);
   const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(
     null,
   );
-
   const buttonRef = useRef<HTMLButtonElement>(null);
   const onLinkClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -57,6 +57,8 @@ export const NombreCellRenderer: React.FC<Props> = ({
   };
 
   useEffect(() => {
+    //TODO: comprobar si el fichero es de tipo PT
+    setIsFilePT(false);
     const handler = (e: MouseEvent) => {
       if (buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
         setOptionsOpen(false);
@@ -123,7 +125,7 @@ export const NombreCellRenderer: React.FC<Props> = ({
               Editar
             </div>
             <div
-              className={styles.menuItem}
+              className={`${styles.menuItem} ${isFilePT ? styles.disabled : ""}`}
               onClick={(e) => {
                 e.stopPropagation();
                 handleRefresh();

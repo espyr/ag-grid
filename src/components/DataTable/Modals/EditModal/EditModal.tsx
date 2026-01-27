@@ -7,7 +7,7 @@ import {
   tipificacionOptions,
 } from "../../../../dataOptions";
 import { toast } from "react-hot-toast";
-import { UploadFile } from "../UploadModal/UploadModal";
+import { UploadFilePayload } from "../UploadModal/UploadModal";
 export const EditModal = ({
   rowData,
   onClose,
@@ -40,7 +40,7 @@ export const EditModal = ({
   const [subcategoriasDisponibles, setSubcategoriasDisponibles] = useState<
     { key: number; text: string }[]
   >([]);
-  const editRow = async (payload: UploadFile) => {
+  const editRow = async (payload: UploadFilePayload) => {
     const toastId = toast.loading("Enviando cambios...");
     try {
       const res = await fetch("/api/edit", {
@@ -56,9 +56,11 @@ export const EditModal = ({
       toast.error("Error al editar el archivo", { id: toastId });
     }
   };
-  const handleSubmit = () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     console.log("refreshData called");
-    editRow({
+    await editRow({
       id: rowData.osp_documentacionid,
       nombre,
       descripcion,
@@ -66,9 +68,11 @@ export const EditModal = ({
       categoria,
       subcategoria,
     });
+
     refreshData?.();
     onClose();
   };
+
   useEffect(() => {
     const cats = categoriaOptions[tipificacion] ?? [];
     setCategoriasDisponibles(cats);
@@ -91,7 +95,7 @@ export const EditModal = ({
   }, [onClose]);
   return (
     <div className={styles.modalBackdrop}>
-      <div className={styles.modal}>
+      <div className={styles.modal} ref={modalRef}>
         <form onSubmit={handleSubmit}>
           <label>Nombre</label>
           <input value={nombre} onChange={(e) => setNombre(e.target.value)} />
