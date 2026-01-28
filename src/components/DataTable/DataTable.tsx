@@ -22,7 +22,6 @@ import { RawDataItem } from "../../data";
 import { columns } from "./DataTableConfig";
 import styles from "./DataTable.module.css";
 import { TopBar } from "../TopBar/TopBar";
-import { getDocumentacionData } from "../../osp_funciones_documentacion";
 export interface Props {
   gridTheme?: string;
   isDarkMode?: boolean;
@@ -47,7 +46,7 @@ export const DataTable: React.FC<Props> = ({
   gridHeight = null,
 }) => {
   const [rowData, setRowData] = useState(
-    getDocumentacionData().map((row: RawDataItem) => ({
+    window.parent.formApi.getDocumentacionData().map((row: RawDataItem) => ({
       ...row,
       createdon: row.createdon ? new Date(row.createdon) : null,
       modifiedon: row.modifiedon ? new Date(row.modifiedon) : null,
@@ -55,7 +54,7 @@ export const DataTable: React.FC<Props> = ({
   );
   const [quickFilterText, setQuickFilterText] = useState("");
   const [selectedRows, setSelectedRows] = useState<RawDataItem[]>([]);
-  const [openMenuRowId, setOpenMenuRowId] = useState<string | null>(null);
+
   const gridRef = useRef<AgGridReact>(null);
   const updateRevisado = async (id: string, revisado: boolean) => {
     const payload = rowData.find((row) => row.osp_documentacionid === id);
@@ -76,15 +75,16 @@ export const DataTable: React.FC<Props> = ({
     }
   };
   const refreshData = useCallback(() => {
-    const newData = getDocumentacionData().map((row: RawDataItem) => ({
+    const newData = window.parent.formApi.getDocumentacionData().map((row) => ({
       ...row,
       createdon: row.createdon ? new Date(row.createdon) : null,
       modifiedon: row.modifiedon ? new Date(row.modifiedon) : null,
     }));
+
     setRowData(newData);
   }, []);
   const colDefs = useMemo<ColDef[]>(
-    () => columns(refreshData, updateRevisado, openMenuRowId, setOpenMenuRowId),
+    () => columns(refreshData, updateRevisado),
     [],
   );
 
