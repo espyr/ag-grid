@@ -1,7 +1,7 @@
 export interface RawDataItem {
   "@odata.etag": string;
-  modifiedon: string;
-  createdon: string;
+  modifiedon: string | null | Date;
+  createdon: string | null | Date;
   osp_documentacionid: string;
   osp_nombre: string;
   _ownerid: string;
@@ -10,7 +10,7 @@ export interface RawDataItem {
   _osp_oportunidad_value: string;
   osp_tipificacion: number | null;
   osp_proyecto: boolean;
-  osp_descripcion: string | null;
+  osp_descripcion: string;
   osp_link: string;
   osp_categoria: number | null;
   _modifiedby: string;

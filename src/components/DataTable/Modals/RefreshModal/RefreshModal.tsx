@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { FileUploader } from "../../components/FileUploader";
 import styles from "./RefreshModal.module.css";
-import { RawDataItem } from "../../../../data";
+import { RawDataItem } from "../../../../types/data";
 import { toast } from "react-hot-toast";
 import { UploadFilePayload } from "../UploadModal/UploadModal";
 interface ErrorState {
@@ -23,19 +23,19 @@ export const RefreshModal = ({
   const modalRef = useRef<HTMLDivElement>(null);
 
   const uploadFile = async (payload: UploadFilePayload) => {
+    console.log("Uploading file with payload:", payload);
     const toastId = toast.loading("Subiendo fichero...");
     try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await window.parent!.formApi!.uploadFile(payload);
+      console.log("Upload response:", res);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       toast.success("Archivo subido con éxito", { id: toastId });
+      refreshData?.();
       onClose();
     } catch (err) {
       console.error("Upload failed:", err);
       toast.error("Error al subir el archivo", { id: toastId });
+      onClose();
     } finally {
       //setLoading(false);
     }
@@ -51,15 +51,16 @@ export const RefreshModal = ({
     }
     console.log(base64, rowData, file);
     console.log("refreshData called");
-    const payload = {
-      id: rowData?.osp_documentacionid,
+    const payload: UploadFilePayload = {
+      documentacionId: rowData?.osp_documentacionid,
       fileName: file.name,
-      contentType: file.type,
-      base64: base64.split(",")[1],
+      fileBase64: base64.split(",")[1],
+      descripcion: rowData?.osp_descripcion,
+      tipificacion: rowData?.osp_tipificacion,
+      categoria: rowData?.osp_categoria,
+      subcategoria: rowData?.osp_subcategoria,
     };
     await uploadFile(payload);
-    refreshData?.();
-    onClose();
   };
   // Close modal on outside click
   useEffect(() => {

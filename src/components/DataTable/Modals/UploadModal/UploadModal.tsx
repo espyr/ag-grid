@@ -18,15 +18,13 @@ interface ErrorState {
   [key: string]: string;
 }
 export interface UploadFilePayload {
-  id?: string;
-  nombre?: string;
+  documentacionId?: string;
   descripcion?: string;
   tipificacion?: number | null;
   categoria?: number | null;
   subcategoria?: number | null;
   fileName?: string;
-  contentType?: string;
-  base64?: string;
+  fileBase64?: string;
 }
 export const UploadModal = ({
   setIsOpenModal,
@@ -91,13 +89,11 @@ export const UploadModal = ({
   }, [setIsOpenModal]);
 
   const uploadFile = async (payload: UploadFilePayload) => {
+    console.log("Uploading file with payload:", payload);
     const toastId = toast.loading("Subiendo fichero...");
     try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await window.parent!.formApi!.uploadFile(payload);
+      console.log("Upload response:", res);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       toast.success("Archivo subido con éxito", { id: toastId });
       refreshData?.();
@@ -105,6 +101,7 @@ export const UploadModal = ({
     } catch (err) {
       console.error("Upload failed:", err);
       toast.error("Error al subir el archivo", { id: toastId });
+      setIsOpenModal(false);
     } finally {
       setLoading(false);
     }
@@ -130,8 +127,7 @@ export const UploadModal = ({
       categoria,
       subcategoria,
       fileName: file.name,
-      contentType: file.type,
-      base64: base64.split(",")[1],
+      fileBase64: base64.split(",")[1],
     };
     await uploadFile(payload);
   };

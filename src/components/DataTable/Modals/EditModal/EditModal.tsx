@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { RawDataItem } from "../../../../data";
+import { RawDataItem } from "../../../../types/data";
 import styles from "./EditModal.module.css";
 import {
   categoriaOptions,
@@ -61,8 +61,7 @@ export const EditModal = ({
 
     console.log("refreshData called");
     await editRow({
-      id: rowData.osp_documentacionid,
-      nombre,
+      documentacionId: rowData.osp_documentacionid,
       descripcion,
       tipificacion,
       categoria,

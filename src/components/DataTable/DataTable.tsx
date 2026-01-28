@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { formatInTimeZone } from "date-fns-tz";
 import { parseISO } from "date-fns";
 import type { SelectionChangedEvent } from "ag-grid-community";
@@ -10,7 +16,6 @@ import {
   DateFilterModule,
   type ColDef,
   type GetRowIdFunc,
-  type GetRowIdParams,
   ModuleRegistry,
 } from "ag-grid-community";
 
@@ -18,7 +23,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 
 import { AgGridReact } from "ag-grid-react";
-import { RawDataItem } from "../../data";
+import { RawDataItem } from "../../types/data";
 import { columns } from "./DataTableConfig";
 import styles from "./DataTable.module.css";
 import { TopBar } from "../TopBar/TopBar";
@@ -45,19 +50,48 @@ export const DataTable: React.FC<Props> = ({
   isDarkMode = false,
   gridHeight = null,
 }) => {
-  const [rowData, setRowData] = useState(
-    window.parent.formApi.getDocumentacionData().map((row: RawDataItem) => ({
-      ...row,
-      createdon: row.createdon ? new Date(row.createdon) : null,
-      modifiedon: row.modifiedon ? new Date(row.modifiedon) : null,
-    })),
-  );
+  const [rowData, setRowData] = useState<RawDataItem[] | null>(null);
+  const hasLoadedRef = useRef(false);
+
+  useEffect(() => {
+    if (hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
+
+    let cancelled = false;
+
+    const waitForFormApi = async () => {
+      while (!window.parent?.formApi?.getDocumentacionData) {
+        if (cancelled) return;
+        await new Promise((r) => setTimeout(r, 100));
+      }
+    };
+
+    const loadData = async () => {
+      try {
+        await waitForFormApi();
+        const data = await window.parent!.formApi!.getDocumentacionData();
+        setRowData(data ?? []);
+      } catch (err) {
+        console.error(err);
+        setRowData([]);
+      } finally {
+        if (cancelled) return;
+      }
+    };
+
+    loadData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const [quickFilterText, setQuickFilterText] = useState("");
   const [selectedRows, setSelectedRows] = useState<RawDataItem[]>([]);
 
   const gridRef = useRef<AgGridReact>(null);
   const updateRevisado = async (id: string, revisado: boolean) => {
-    const payload = rowData.find((row) => row.osp_documentacionid === id);
+    const payload = rowData?.find((row) => row.osp_documentacionid === id);
     const newPayload = { ...payload, osp_revisado: revisado };
     console.log("newPayload:", newPayload);
 
@@ -74,14 +108,18 @@ export const DataTable: React.FC<Props> = ({
       console.error("Failed to update Revisado:", err);
     }
   };
-  const refreshData = useCallback(() => {
-    const newData = window.parent.formApi.getDocumentacionData().map((row) => ({
-      ...row,
-      createdon: row.createdon ? new Date(row.createdon) : null,
-      modifiedon: row.modifiedon ? new Date(row.modifiedon) : null,
-    }));
+  const refreshData = useCallback(async () => {
+    const data = await window.parent?.formApi?.getDocumentacionData();
+    const newData =
+      data &&
+      data.map((row) => ({
+        ...row,
+        createdon: row.createdon ? new Date(row.createdon) : null,
+        modifiedon: row.modifiedon ? new Date(row.modifiedon) : null,
+      }));
 
-    setRowData(newData);
+    newData && setRowData(newData);
+    console.log("Data refreshed");
   }, []);
   const colDefs = useMemo<ColDef[]>(
     () => columns(refreshData, updateRevisado),
@@ -98,12 +136,10 @@ export const DataTable: React.FC<Props> = ({
     }),
     [],
   );
-
   const getRowId = useCallback<GetRowIdFunc>(
-    ({ data: { id } }: GetRowIdParams) => id,
+    ({ data }) => data.osp_documentacionid,
     [],
   );
-
   const themeClass = `${gridTheme}${isDarkMode ? "-dark" : ""}`;
   const onSelectionChanged = useCallback((event: SelectionChangedEvent) => {
     const selectedRows = event.api.getSelectedRows();
@@ -124,6 +160,7 @@ export const DataTable: React.FC<Props> = ({
         selectedRows={selectedRows}
         refreshData={refreshData}
       />
+
       <AgGridReact
         theme="legacy"
         ref={gridRef}
@@ -134,6 +171,14 @@ export const DataTable: React.FC<Props> = ({
         defaultColDef={defaultColDef}
         pagination={true}
         paginationPageSize={10}
+        noRowsOverlayComponent={() => (
+          <div style={{ padding: 20 }}>No data available</div>
+        )}
+        loadingOverlayComponent={() => (
+          <div style={{ padding: 20 }}>
+            <i className="fas fa-spinner fa-pulse" /> Cargando datos...
+          </div>
+        )}
         paginationPageSizeSelector={false}
         onSelectionChanged={onSelectionChanged}
         rowSelection={{

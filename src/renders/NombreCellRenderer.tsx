@@ -4,7 +4,7 @@ import styles from "./NombreCellRenderer.module.css";
 import { Icon } from "@fluentui/react";
 import { EditModal } from "../components/DataTable/Modals/EditModal/EditModal";
 import { RefreshModal } from "../components/DataTable/Modals/RefreshModal/RefreshModal";
-import { RawDataItem } from "../data";
+import { RawDataItem } from "../types/data";
 
 interface Props {
   value: string;

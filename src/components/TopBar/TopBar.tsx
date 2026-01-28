@@ -4,8 +4,7 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { useState } from "react";
 import { UploadModal } from "../DataTable/Modals/UploadModal/UploadModal";
-import { RawDataItem } from "../../data";
-import { getUrlSharepoint } from "../../osp_funciones_documentacion";
+import { RawDataItem } from "../../types/data";
 
 export const TopBar: React.FC<{
   selectedRows?: RawDataItem[];
@@ -66,11 +65,27 @@ export const TopBar: React.FC<{
     handleBulkDownload();
     console.log(selectedRows);
   };
-  const openSharePoint = (e: React.MouseEvent) => {
+  const openSharePoint = async (e: React.MouseEvent) => {
     e.preventDefault();
-    const sharePointLink = getUrlSharepoint();
-    window.open(sharePointLink, "_blank");
+
+    // MUST be sync
+    const newWindow = window.open("", "_blank");
+
+    if (!newWindow) {
+      console.error("Popup blocked");
+      return;
+    }
+
+    try {
+      const sharePointLink = await window.parent!.formApi!.getUrlSharepoint();
+
+      newWindow.location.href = sharePointLink;
+    } catch (err) {
+      newWindow.close();
+      console.error("Failed to get SharePoint link", err);
+    }
   };
+
   return (
     <div className={styles.topBar}>
       <div className={styles.leftActions}>
