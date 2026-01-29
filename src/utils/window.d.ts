@@ -1,4 +1,4 @@
-import { RawDataItem } from "./data";
+import { RawDataItem } from "../types/data";
 
 export {};
 

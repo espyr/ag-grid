@@ -1,20 +1,20 @@
 import styles from "./ReplaceModal.module.css";
 interface ReplaceModalProps {
   confirmReplace: () => Promise<void>;
-  setShowReplaceModal: (show: boolean) => void;
+  setShowReplaceConfirmationModal: (show: boolean) => void;
   setPendingFile: (file: File | null) => void;
   setPendingBase64: (base64: string | null) => void;
   setIsOpenModal: (isOpen: boolean) => void;
 }
-export const ReplaceModal = ({
+export const ReplaceConfirmationModal = ({
   confirmReplace,
-  setShowReplaceModal,
+  setShowReplaceConfirmationModal,
   setPendingFile,
   setPendingBase64,
   setIsOpenModal,
 }: ReplaceModalProps) => {
   const onCancel = () => {
-    setShowReplaceModal(false);
+    setShowReplaceConfirmationModal(false);
     setPendingFile(null);
     setPendingBase64(null);
     setIsOpenModal(true);

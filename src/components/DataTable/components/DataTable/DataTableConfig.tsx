@@ -4,8 +4,8 @@ import {
   categoriaOptions,
   subcategoriaOptions,
   tipificacionOptions,
-} from "../../dataOptions";
-import { NombreCellRenderer } from "../../renders/NombreCellRenderer";
+} from "../../../../utils/dataOptions";
+import { NombreCellRenderer } from "../../../../renders/NombreCellRenderer";
 
 const formatDate = (fechaCadena: string | null | undefined): string => {
   if (!fechaCadena) return "";

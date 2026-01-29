@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 
-import { DataTable } from "./components/DataTable/DataTable";
+import { DataTable } from "./components/DataTable/components/DataTable/DataTable";
 import { initializeIcons } from "@fluentui/react";
 import { Toaster } from "react-hot-toast";
 

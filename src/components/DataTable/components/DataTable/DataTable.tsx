@@ -23,10 +23,10 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 
 import { AgGridReact } from "ag-grid-react";
-import { RawDataItem } from "../../types/data";
-import { columns } from "./DataTableConfig";
+import { getData, RawDataItem } from "../../../../types/data";
 import styles from "./DataTable.module.css";
-import { TopBar } from "../TopBar/TopBar";
+import { TopBar } from "../../../TopBar/TopBar";
+import { columns } from "./DataTableConfig";
 export interface Props {
   gridTheme?: string;
   isDarkMode?: boolean;
@@ -68,8 +68,9 @@ export const DataTable: React.FC<Props> = ({
 
     const loadData = async () => {
       try {
-        await waitForFormApi();
-        const data = await window.parent!.formApi!.getDocumentacionData();
+        //await waitForFormApi();
+        const data = getData();
+        // await window.parent!.formApi!.getDocumentacionData();
         setRowData(data ?? []);
       } catch (err) {
         console.error(err);
@@ -109,7 +110,7 @@ export const DataTable: React.FC<Props> = ({
     }
   };
   const refreshData = useCallback(async () => {
-    const data = await window.parent?.formApi?.getDocumentacionData();
+    const data = getData();
     const newData =
       data &&
       data.map((row) => ({

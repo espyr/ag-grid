@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import styles from "./NombreCellRenderer.module.css";
 import { Icon } from "@fluentui/react";
 import { EditModal } from "../components/DataTable/Modals/EditModal/EditModal";
-import { RefreshModal } from "../components/DataTable/Modals/RefreshModal/RefreshModal";
+import { ReeplaceFileModal } from "../components/DataTable/Modals/ReeplaceFileModal/ReeplaceFileModal";
 import { RawDataItem } from "../types/data";
 
 interface Props {
@@ -108,7 +108,7 @@ export const NombreCellRenderer: React.FC<Props> = ({
 
       {refreshOpen &&
         createPortal(
-          <RefreshModal
+          <ReeplaceFileModal
             rowData={rowData}
             onClose={() => setRefreshOpen(false)}
             refreshData={refreshData}
