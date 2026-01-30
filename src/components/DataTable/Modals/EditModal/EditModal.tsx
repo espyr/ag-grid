@@ -3,10 +3,17 @@ import { RawDataItem } from "../../../../types/data";
 import styles from "./EditModal.module.css";
 import { tipificacionOptions } from "../../../../utils/dataOptions";
 import { toast } from "react-hot-toast";
-import { UploadFilePayload } from "../UploadModal/UploadModal";
 import { useDocumentationCategories } from "../../../../utils/useDocumentationCategories";
 import { DocumentationModal } from "../../../DocumentationModal/DocumentationModal";
 
+interface EditFilePayload {
+  documentacionId: string;
+  descripcion?: string;
+  tipificacionValue?: number | null;
+  categoriaValue?: number | null;
+  subcategoriaValue?: number | null;
+  fileName?: string;
+}
 export const EditModal = ({
   rowData,
   onClose,
@@ -37,21 +44,17 @@ export const EditModal = ({
       setSubcategoria,
     });
 
-  const editRow = async (payload: UploadFilePayload) => {
+  const editRow = async (payload: EditFilePayload) => {
     const toastId = toast.loading("Enviando cambios...");
     try {
-      const res = await fetch("/api/edit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      toast.success("Archivo editado con éxito", { id: toastId });
+      const res = await window.parent!.formApi!.updateRecord(payload);
+      if (res !== "OK") throw new Error("HTTP error");
+      toast.success("Registro editado con éxito", { id: toastId });
       refreshData?.();
       onClose();
     } catch (err) {
       console.error("Edit failed:", err);
-      toast.error("Error al editar el archivo", { id: toastId });
+      toast.error("Error al editar el registro", { id: toastId });
     }
   };
 
@@ -61,9 +64,10 @@ export const EditModal = ({
     await editRow({
       documentacionId: rowData.osp_documentacionid,
       descripcion,
-      tipificacion,
-      categoria,
-      subcategoria,
+      tipificacionValue: tipificacion,
+      categoriaValue: categoria,
+      subcategoriaValue: subcategoria,
+      fileName: rowData.osp_nombre,
     });
   };
 
@@ -72,7 +76,6 @@ export const EditModal = ({
       <form onSubmit={handleSubmit}>
         <label>Nombre</label>
         <input value={nombre} onChange={(e) => setNombre(e.target.value)} />
-
         <label>
           Tipificación <span className={styles.required}>*</span>
         </label>

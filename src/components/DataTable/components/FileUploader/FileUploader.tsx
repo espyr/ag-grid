@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import styles from "./FileUploader.module.css";
+import { toast } from "react-hot-toast";
 interface FileUploaderProps {
   file: File | null;
   setFile: (file: File | null) => void;
@@ -31,17 +32,11 @@ export const FileUploader = ({
 
   const checkIfFileExists = async (fileName: string) => {
     try {
-      const res = await fetch("/api/file-exists", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileName }),
-      });
-      if (!res.ok) throw new Error("Check failed");
-      const data = await res.json();
-      return data.exists;
+      const res = await window.parent!.formApi!.isFileExist(fileName);
+      return res;
     } catch (err) {
-      console.error("Check failed:", err);
-      return false;
+      console.error("Error al verificar existencia del archivo:", err);
+      toast.error("Error al verificar existencia del archivo");
     }
   };
 
@@ -53,7 +48,6 @@ export const FileUploader = ({
     setErrors({ ...errors, file: "" });
 
     const exists = onFileExists && (await checkIfFileExists(selectedFile.name));
-    //const exists = true; // For testing purposes
     setLoading(false);
 
     if (exists && onFileExists) {

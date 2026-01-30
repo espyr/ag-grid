@@ -15,6 +15,16 @@ declare global {
       fileName?: string;
       fileBase64?: string;
     }): Promise<res>;
+    isFileExist(fileName: string): Promise<boolean>;
+    updateRecord(payload: {
+      documentacionId: string;
+      descripcion?: string;
+      tipificacionValue?: number | null;
+      categoriaValue?: number | null;
+      subcategoriaValue?: number | null;
+      fileName?: string;
+    }): Promise<res>;
+    isAdmin(): Promise<boolean>;
   }
 
   interface Window {

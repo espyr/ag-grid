@@ -55,8 +55,8 @@ export const UploadModal = ({
     const toastId = toast.loading("Subiendo fichero...");
     try {
       const res = await window.parent!.formApi!.uploadFile(payload);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      toast.success("Archivo subido con éxito", { id: toastId });
+      if (res !== "OK") throw new Error("HTTP error");
+      toast.success("El fichero se ha subido correctamente", { id: toastId });
       refreshData?.();
       setIsOpenModal(false);
     } catch (err) {

@@ -2,7 +2,7 @@ import { Icon } from "@fluentui/react";
 import styles from "./TopBar.module.css";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UploadModal } from "../DataTable/Modals/UploadModal/UploadModal";
 import { RawDataItem } from "../../types/data";
 
@@ -14,7 +14,24 @@ export const TopBar: React.FC<{
 }> = ({ selectedRows, quickFilterText, setQuickFilterText, refreshData }) => {
   const isButtonVisible = selectedRows && selectedRows.length > 0;
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const isAdmin = true; // TODO: Replace with actual admin check
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
+  useEffect(() => {
+    let mounted = true;
+    const checkAdmin = async () => {
+      try {
+        const result = await window.parent!.formApi!.isAdmin();
+        if (mounted) setIsAdmin(Boolean(result));
+      } catch (err) {
+        console.error("Failed to check admin status", err);
+      }
+    };
+    checkAdmin();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const handleBulkDownload = async () => {
     if (!selectedRows?.length) return;
 

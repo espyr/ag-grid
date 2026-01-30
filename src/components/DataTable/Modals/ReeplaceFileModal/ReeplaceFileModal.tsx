@@ -27,7 +27,7 @@ export const ReeplaceFileModal = ({
     const toastId = toast.loading("Subiendo fichero...");
     try {
       const res = await window.parent!.formApi!.uploadFile(payload);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) throw new Error("HTTP error");
       toast.success("Archivo subido con éxito", { id: toastId });
       refreshData?.();
       onClose();

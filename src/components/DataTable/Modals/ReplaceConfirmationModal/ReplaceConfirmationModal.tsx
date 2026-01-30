@@ -1,5 +1,5 @@
-import styles from "./ReplaceModal.module.css";
-interface ReplaceModalProps {
+import styles from "./ReplaceConfirmationModal.module.css";
+interface ReplaceConfirmationModalProps {
   confirmReplace: () => Promise<void>;
   setShowReplaceConfirmationModal: (show: boolean) => void;
   setPendingFile: (file: File | null) => void;
@@ -12,7 +12,7 @@ export const ReplaceConfirmationModal = ({
   setPendingFile,
   setPendingBase64,
   setIsOpenModal,
-}: ReplaceModalProps) => {
+}: ReplaceConfirmationModalProps) => {
   const onCancel = () => {
     setShowReplaceConfirmationModal(false);
     setPendingFile(null);
@@ -20,7 +20,7 @@ export const ReplaceConfirmationModal = ({
     setIsOpenModal(true);
   };
   return (
-    <div className={styles.replaceModal}>
+    <div className={styles.replaceConfirmationModal}>
       <p>
         El archivo ya existe. <br />
         ¿Deseas reemplazarlo?

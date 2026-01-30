@@ -29,7 +29,7 @@ export const NombreCellRenderer: React.FC<Props> = ({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const onLinkClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    window.open("https://www.google.com", "_blank");
+    window.open(data.osp_link, "_blank");
   };
   const handleEdit = () => {
     console.log("Editar clicked", data.osp_documentacionid);
