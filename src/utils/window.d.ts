@@ -15,7 +15,7 @@ declare global {
       fileName?: string;
       fileBase64?: string;
     }): Promise<res>;
-    isFileExist(fileName: string): Promise<boolean>;
+    isFileExist(fileName: string): Promise<string>;
     updateRecord(payload: {
       documentacionId: string;
       descripcion?: string;
@@ -23,6 +23,7 @@ declare global {
       categoriaValue?: number | null;
       subcategoriaValue?: number | null;
       fileName?: string;
+      revisado?: boolean;
     }): Promise<res>;
     isAdmin(): Promise<boolean>;
   }

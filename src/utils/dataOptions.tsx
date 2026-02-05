@@ -1,13 +1,9 @@
-export interface tipificacionOption {
-  key: number;
-  text: string;
-}
-export interface categoriaOption {
-  [key: number]: { key: number; text: string }[];
-}
-export interface subcategoriaOption {
-  [key: number]: { key: number; text: string }[];
-}
+import {
+  categoriaOption,
+  subcategoriaOption,
+  tipificacionOption,
+} from "../types/data";
+
 export const tipificacionOptions: tipificacionOption[] = [
   { key: 0, text: "" },
   { key: 863920000, text: "Requisitos Clientes" },

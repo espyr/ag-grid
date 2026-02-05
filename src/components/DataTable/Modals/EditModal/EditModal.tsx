@@ -13,6 +13,8 @@ interface EditFilePayload {
   categoriaValue?: number | null;
   subcategoriaValue?: number | null;
   fileName?: string;
+  revisado?: boolean;
+  nuevoName?: string;
 }
 export const EditModal = ({
   rowData,
@@ -21,7 +23,7 @@ export const EditModal = ({
 }: {
   rowData: RawDataItem;
   onClose: () => void;
-  refreshData?: () => void;
+  refreshData?: () => Promise<void>;
 }) => {
   const [descripcion, setDescripcion] = useState(rowData.osp_descripcion ?? "");
   const [nombre, setNombre] = useState(rowData.osp_nombre ?? "");
@@ -47,11 +49,12 @@ export const EditModal = ({
   const editRow = async (payload: EditFilePayload) => {
     const toastId = toast.loading("Enviando cambios...");
     try {
-      const res = await window.parent!.formApi!.updateRecord(payload);
-      if (res !== "OK") throw new Error("HTTP error");
-      toast.success("Registro editado con éxito", { id: toastId });
-      refreshData?.();
       onClose();
+      const res = await window.parent!.formApi!.updateRecord(payload);
+      console.log("Edit response:", res);
+      if (res && res !== "OK") throw new Error("HTTP error");
+      toast.success("Registro editado con éxito", { id: toastId });
+      await refreshData?.();
     } catch (err) {
       console.error("Edit failed:", err);
       toast.error("Error al editar el registro", { id: toastId });
@@ -67,7 +70,9 @@ export const EditModal = ({
       tipificacionValue: tipificacion,
       categoriaValue: categoria,
       subcategoriaValue: subcategoria,
+      nuevoName: nombre,
       fileName: rowData.osp_nombre,
+      revisado: rowData.osp_validadocontratacion,
     });
   };
 

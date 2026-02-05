@@ -17,7 +17,7 @@ export const ReeplaceFileModal = ({
 }: {
   rowData: RawDataItem | null;
   onClose: () => void;
-  refreshData?: () => void;
+  refreshData?: () => Promise<void>;
 }) => {
   const [file, setFile] = useState<File | null>(null);
   const [base64, setBase64] = useState<string | null>(null);
@@ -26,11 +26,12 @@ export const ReeplaceFileModal = ({
   const uploadFile = async (payload: UploadFilePayload) => {
     const toastId = toast.loading("Subiendo fichero...");
     try {
+      onClose();
+      console.log("Uploading with payload:", payload);
       const res = await window.parent!.formApi!.uploadFile(payload);
       if (!res.ok) throw new Error("HTTP error");
       toast.success("Archivo subido con éxito", { id: toastId });
-      refreshData?.();
-      onClose();
+      await refreshData?.();
     } catch (err) {
       console.error("Upload failed:", err);
       toast.error("Error al subir el archivo", { id: toastId });

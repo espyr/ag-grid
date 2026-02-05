@@ -10,6 +10,6 @@ initializeIcons();
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Toaster position="top-right" />
-    <DataTable />
+    <DataTable mode="documentacion" />
   </React.StrictMode>,
 );

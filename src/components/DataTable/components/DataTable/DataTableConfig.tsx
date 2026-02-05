@@ -1,37 +1,21 @@
 import { ColDef } from "ag-grid-community";
-import moment from "moment";
+
+import { NombreCellRenderer } from "../../../../renders/NombreCellRenderer";
+import { formatDate, getTextByKey } from "../../../../utils/functions";
 import {
   categoriaOptions,
   subcategoriaOptions,
   tipificacionOptions,
 } from "../../../../utils/dataOptions";
-import { NombreCellRenderer } from "../../../../renders/NombreCellRenderer";
 
-const formatDate = (fechaCadena: string | null | undefined): string => {
-  if (!fechaCadena) return "";
-  const m = moment(fechaCadena);
-  return m.isValid() ? m.format("DD/MM/YYYY HH:mm") : String(fechaCadena);
-};
-export const getByTextByKey = (
-  listOfOptions: { [key: number]: { key: number; text: string }[] },
-  keyToFind: number,
-): string | undefined => {
-  for (const opciones of Object.values(listOfOptions)) {
-    const found = opciones.find((opt) => opt.key === keyToFind);
-    if (found) {
-      return found.text;
-    }
-  }
-  return undefined;
-};
-export const columns = (
+export const documentationColumns = (
   refreshData: () => void,
   updateRevisado: (id: string, value: boolean) => void,
 ): ColDef[] => [
   {
     field: "osp_nombre",
     headerName: "Nombre",
-    minWidth: 150,
+    minWidth: 250,
     resizable: true,
     cellRenderer: NombreCellRenderer,
     cellRendererParams: {
@@ -64,7 +48,7 @@ export const columns = (
     minWidth: 150,
     resizable: true,
     valueGetter: ({ data }) =>
-      getByTextByKey(categoriaOptions, data?.osp_categoria) ?? "",
+      getTextByKey(categoriaOptions, data?.osp_categoria) ?? "",
     getQuickFilterText: () => "",
   },
   {
@@ -73,7 +57,112 @@ export const columns = (
     minWidth: 150,
     resizable: true,
     valueGetter: ({ data }) =>
-      getByTextByKey(subcategoriaOptions, data?.osp_subcategoria) ?? "",
+      getTextByKey(subcategoriaOptions, data?.osp_subcategoria) ?? "",
+    getQuickFilterText: () => "",
+  },
+  {
+    field: "osp_descripcion",
+    headerName: "Descripción",
+    minWidth: 150,
+    resizable: true,
+    getQuickFilterText: () => "",
+  },
+  {
+    field: "osp_validadocontratacion",
+    headerName: "Revisado",
+    minWidth: 80,
+    resizable: true,
+    editable: true,
+    cellStyle: { justifyContent: "center", display: "flex" },
+    getQuickFilterText: () => "",
+    onCellValueChanged: (params) => {
+      updateRevisado(params.data.osp_documentacionid, params.newValue);
+    },
+  },
+  {
+    field: "_ownerid",
+    headerName: "Creado por",
+    minWidth: 150,
+    resizable: true,
+    getQuickFilterText: () => "",
+  },
+  {
+    field: "createdon",
+    minWidth: 150,
+    headerName: "Fecha Creación",
+    filter: "agDateColumnFilter",
+    valueGetter: ({ data }) =>
+      data?.createdon ? new Date(data.createdon) : null,
+    valueFormatter: ({ value }) => (value ? formatDate(value) : ""),
+    filterParams: {
+      comparator: (filterDate: Date, cellValue: Date) => {
+        if (!cellValue) return -1;
+        const cell = new Date(cellValue);
+        if (cell < filterDate) return -1;
+        if (cell > filterDate) return 1;
+        return 0;
+      },
+    },
+  },
+  {
+    field: "modifiedon",
+    headerName: "Fecha Modificación",
+    minWidth: 180,
+    valueGetter: ({ data }) =>
+      data?.modifiedon ? new Date(data.modifiedon) : null,
+    valueFormatter: ({ value }) => (value ? formatDate(value) : ""),
+    filter: "agDateColumnFilter",
+    getQuickFilterText: () => "",
+    filterParams: {
+      filterOptions: ["lessThan", "greaterThan", "inRange"],
+      suppressAndOrCondition: true,
+      comparator: (filterDate: Date, cellValue: Date) => {
+        if (!cellValue) return -1;
+        const cell = new Date(cellValue);
+        if (cell < filterDate) return -1;
+        if (cell > filterDate) return 1;
+        return 0;
+      },
+    },
+  },
+  {
+    field: "_modifiedby",
+    headerName: "Modificado por",
+    minWidth: 180,
+    resizable: true,
+    getQuickFilterText: () => "",
+  },
+];
+export const cuentaColumns = (refreshData: () => void): ColDef[] => [
+  {
+    field: "osp_nombre",
+    headerName: "Nombre",
+    minWidth: 250,
+    resizable: true,
+    cellRenderer: NombreCellRenderer,
+    cellRendererParams: {
+      refreshData,
+      tipificacionOptions,
+    },
+    getQuickFilterText: (params) => {
+      return params.value ?? "";
+    },
+  },
+  {
+    field: "osp_registro",
+    headerName: "Registro",
+    minWidth: 120,
+    resizable: true,
+    getQuickFilterText: () => "",
+  },
+  {
+    field: "osp_tipificacion",
+    headerName: "Tipificación",
+    minWidth: 150,
+    resizable: true,
+    valueGetter: ({ data }) =>
+      tipificacionOptions.find((o) => o.key === data?.osp_tipificacion)?.text ??
+      "",
     getQuickFilterText: () => "",
   },
   {
@@ -84,26 +173,6 @@ export const columns = (
     getQuickFilterText: () => "",
   },
   {
-    field: "osp_validadocontratacion",
-    headerName: "Revisado",
-    minWidth: 100,
-    resizable: true,
-    editable: true,
-    cellStyle: { justifyContent: "center", display: "flex" },
-    getQuickFilterText: () => "",
-    onCellValueChanged: (params) => {
-      const newValue = params.newValue;
-      const oldValue = params.oldValue;
-      const row = params.data;
-
-      if (newValue !== oldValue) {
-        console.log("Revisado changed:", newValue, row);
-        updateRevisado(row.osp_documentacionid, newValue);
-      }
-    },
-  },
-
-  {
     field: "_ownerid",
     headerName: "Creado por",
     minWidth: 150,
@@ -113,55 +182,40 @@ export const columns = (
   {
     field: "createdon",
     headerName: "Fecha Creación",
-    minWidth: 160,
-    valueFormatter: ({ value }) => formatDate(value),
     filter: "agDateColumnFilter",
-    filterParams: {
-      filterOptions: ["lessThan", "greaterThan", "inRange"],
-      suppressAndOrCondition: true,
 
+    valueGetter: ({ data }) =>
+      data?.createdon ? new Date(data.createdon) : null,
+    valueFormatter: ({ value }) => (value ? formatDate(value) : ""),
+    filterParams: {
       comparator: (filterDate: Date, cellValue: Date) => {
         if (!cellValue) return -1;
-
-        const cellTime = cellValue.getTime();
-        const filterTime = filterDate.getTime();
-
-        if (cellTime === filterTime) return 0;
-        return cellTime < filterTime ? -1 : 1;
+        const cell = new Date(cellValue);
+        if (cell < filterDate) return -1;
+        if (cell > filterDate) return 1;
+        return 0;
       },
     },
-
-    getQuickFilterText: () => "",
   },
   {
     field: "modifiedon",
     headerName: "Fecha Modificación",
     minWidth: 180,
     valueGetter: ({ data }) =>
-      data?.osp_fecha_modificacion_meta ?? data?.modifiedon,
-    valueFormatter: ({ value }) => formatDate(value),
+      data?.modifiedon ? new Date(data.modifiedon) : null,
+    valueFormatter: ({ value }) => (value ? formatDate(value) : ""),
     filter: "agDateColumnFilter",
     getQuickFilterText: () => "",
     filterParams: {
       filterOptions: ["lessThan", "greaterThan", "inRange"],
       suppressAndOrCondition: true,
-
       comparator: (filterDate: Date, cellValue: Date) => {
         if (!cellValue) return -1;
-
-        const cellTime = cellValue.getTime();
-        const filterTime = filterDate.getTime();
-
-        if (cellTime === filterTime) return 0;
-        return cellTime < filterTime ? -1 : 1;
+        const cell = new Date(cellValue);
+        if (cell < filterDate) return -1;
+        if (cell > filterDate) return 1;
+        return 0;
       },
     },
-  },
-  {
-    field: "_modifiedby",
-    headerName: "Modificado por",
-    minWidth: 180,
-    resizable: true,
-    getQuickFilterText: () => "",
   },
 ];

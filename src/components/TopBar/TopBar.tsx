@@ -1,7 +1,5 @@
 import { Icon } from "@fluentui/react";
 import styles from "./TopBar.module.css";
-import JSZip from "jszip";
-import { saveAs } from "file-saver";
 import { useEffect, useState } from "react";
 import { UploadModal } from "../DataTable/Modals/UploadModal/UploadModal";
 import { RawDataItem } from "../../types/data";
@@ -10,19 +8,38 @@ export const TopBar: React.FC<{
   selectedRows?: RawDataItem[];
   quickFilterText: string;
   setQuickFilterText: (text: string) => void;
-  refreshData?: () => void;
+  refreshData?: () => Promise<void>;
 }> = ({ selectedRows, quickFilterText, setQuickFilterText, refreshData }) => {
   const isButtonVisible = selectedRows && selectedRows.length > 0;
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
+  const handleBulkDownload = async () => {
+    if (!selectedRows?.length) return;
+
+    try {
+      for (const item of selectedRows) {
+        window.open(item.osp_link, "_blank", "noreferrer");
+
+        // wait 500 ms before next
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      }
+    } catch (error) {
+      console.error("Open links failed:", error);
+      alert("No se pudieron abrir los archivos.");
+    }
+  };
+
   useEffect(() => {
     let mounted = true;
     const checkAdmin = async () => {
+      console.log("Checking admin status");
       try {
         const result = await window.parent!.formApi!.isAdmin();
+        console.log("Admin status:", result);
         if (mounted) setIsAdmin(Boolean(result));
       } catch (err) {
+        setIsAdmin(false);
         console.error("Failed to check admin status", err);
       }
     };
@@ -31,50 +48,14 @@ export const TopBar: React.FC<{
       mounted = false;
     };
   }, []);
-
-  const handleBulkDownload = async () => {
-    if (!selectedRows?.length) return;
-
-    const zip = new JSZip();
-    const folder = zip.folder("archivos");
-
-    try {
-      for (const item of selectedRows) {
-        const url = item.osp_link;
-        const baseName =
-          item.osp_nombre?.replace(/[^\w\d]+/g, "_") || "archivo";
-
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const blob = await res.blob();
-
-        // Try to infer extension
-        const type = res.headers.get("content-type") || "";
-        let ext = "";
-        if (type.includes("pdf")) ext = ".pdf";
-        else if (type.includes("png")) ext = ".png";
-        else if (type.includes("jpeg")) ext = ".jpg";
-
-        folder?.file(baseName + ext, blob);
-      }
-
-      const zipBlob = await zip.generateAsync({ type: "blob" });
-      saveAs(zipBlob, "descarga.zip");
-    } catch (e) {
-      console.error("ZIP download failed:", e);
-      alert("No se pudieron descargar los archivos. Posible problema de CORS.");
-    }
-  };
-
   const uploadFile = () => {
     setIsOpenModal(true);
   };
-  const deleteFiles = () => {
+  const deleteFiles = async () => {
     console.log("Eliminar ficheros seleccionados");
     console.log(selectedRows);
     console.log("refreshData called");
-    refreshData?.();
+    await refreshData?.();
   };
   const downloadFiles = () => {
     // Lógica para descargar la documentación

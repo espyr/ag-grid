@@ -9,7 +9,7 @@ import { RawDataItem } from "../types/data";
 interface Props {
   value: string;
   data: RawDataItem;
-  refreshData?: () => void;
+  refreshData?: () => Promise<void>;
 }
 
 export const NombreCellRenderer: React.FC<Props> = ({

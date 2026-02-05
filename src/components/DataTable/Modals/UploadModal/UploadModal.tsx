@@ -9,7 +9,7 @@ import { useDocumentationCategories } from "../../../../utils/useDocumentationCa
 
 interface UploadModalProps {
   setIsOpenModal: (isOpen: boolean) => void;
-  refreshData?: () => void;
+  refreshData?: () => Promise<void>;
 }
 
 interface ErrorState {
@@ -40,6 +40,7 @@ export const UploadModal = ({
   const [errors, setErrors] = useState<ErrorState | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingBase64, setPendingBase64] = useState<string | null>(null);
+  const [existingFileId, setExistingFileId] = useState<string | null>(null);
   const [showReplaceConfirmationModal, setShowReplaceConfirmationModal] =
     useState(false);
 
@@ -52,17 +53,18 @@ export const UploadModal = ({
     });
 
   const uploadFile = async (payload: UploadFilePayload) => {
+    setIsOpenModal(false);
     const toastId = toast.loading("Subiendo fichero...");
     try {
+      console.log("isloading:", loading);
+      console.log("Uploading with payload:", payload);
       const res = await window.parent!.formApi!.uploadFile(payload);
-      if (res !== "OK") throw new Error("HTTP error");
+      if (res && res !== "OK") throw new Error("HTTP error");
       toast.success("El fichero se ha subido correctamente", { id: toastId });
-      refreshData?.();
-      setIsOpenModal(false);
+      await refreshData?.();
     } catch (err) {
       console.error("Upload failed:", err);
       toast.error("Error al subir el archivo", { id: toastId });
-      setIsOpenModal(false);
     } finally {
       setLoading(false);
     }
@@ -83,7 +85,6 @@ export const UploadModal = ({
     }
 
     setLoading(true);
-
     const payload: UploadFilePayload = {
       descripcion,
       tipificacion,
@@ -113,10 +114,12 @@ export const UploadModal = ({
       fileName: pendingFile.name,
       contentType: pendingFile.type,
       base64: pendingBase64.split(",")[1],
+      documentacionId: existingFileId!,
     };
 
     setIsOpenModal(false);
     setLoading(true);
+    console.log("Replacing with payload:", payload);
     await uploadFile(payload);
 
     setPendingFile(null);
@@ -187,6 +190,7 @@ export const UploadModal = ({
         </select>
 
         <FileUploader
+          setExistingFileId={setExistingFileId}
           file={file}
           setFile={setFile}
           setBase64={setBase64}
