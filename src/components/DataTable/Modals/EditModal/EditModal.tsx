@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RawDataItem } from "../../../../types/data";
 import styles from "./EditModal.module.css";
 import { tipificacionOptions } from "../../../../utils/dataOptions";
@@ -16,6 +16,7 @@ interface EditFilePayload {
   revisado?: boolean;
   nuevoName?: string;
 }
+
 export const EditModal = ({
   rowData,
   onClose,
@@ -27,15 +28,19 @@ export const EditModal = ({
 }) => {
   const [descripcion, setDescripcion] = useState(rowData.osp_descripcion ?? "");
   const [nombre, setNombre] = useState(rowData.osp_nombre ?? "");
-  const [tipificacion, setTipificacion] = useState(
-    rowData.osp_tipificacion ?? 0,
+
+  const [tipificacion, setTipificacion] = useState<number | null>(
+    rowData.osp_tipificacion ?? null,
   );
+
   const [categoria, setCategoria] = useState<number | null>(
     rowData.osp_categoria ?? null,
   );
+
   const [subcategoria, setSubcategoria] = useState<number | null>(
     rowData.osp_subcategoria ?? null,
   );
+
   const [errors, setErrors] = useState<Record<string, string> | null>(null);
 
   const { categoriasDisponibles, subcategoriasDisponibles } =
@@ -45,6 +50,11 @@ export const EditModal = ({
       setCategoria,
       setSubcategoria,
     });
+
+  // Reset subcategoria when categoria changes
+  useEffect(() => {
+    setSubcategoria(null);
+  }, [categoria]);
 
   const editRow = async (payload: EditFilePayload) => {
     const toastId = toast.loading("Enviando cambios...");
@@ -56,7 +66,6 @@ export const EditModal = ({
       toast.success("Registro editado con éxito", { id: toastId });
       await refreshData?.();
     } catch (err) {
-      console.error("Edit failed:", err);
       toast.error("Error al editar el registro", { id: toastId });
     }
   };
@@ -81,14 +90,16 @@ export const EditModal = ({
       <form onSubmit={handleSubmit}>
         <label>Nombre</label>
         <input value={nombre} onChange={(e) => setNombre(e.target.value)} />
+
         <label>
           Tipificación <span className={styles.required}>*</span>
         </label>
         <select
-          value={tipificacion}
+          value={tipificacion ?? ""}
           onChange={(e) => {
-            setTipificacion(Number(e.target.value));
-            setErrors({ ...errors, tipificacion: "" });
+            const value = e.target.value ? Number(e.target.value) : null;
+            setTipificacion(value);
+            setErrors((prev) => ({ ...prev, tipificacion: "" }));
           }}
         >
           <option value="">Selecciona...</option>
@@ -106,7 +117,9 @@ export const EditModal = ({
         <label>Categoría</label>
         <select
           value={categoria ?? ""}
-          onChange={(e) => setCategoria(Number(e.target.value))}
+          onChange={(e) =>
+            setCategoria(e.target.value ? Number(e.target.value) : null)
+          }
           disabled={!tipificacion || categoriasDisponibles.length === 0}
         >
           <option value="">Selecciona...</option>
@@ -120,7 +133,9 @@ export const EditModal = ({
         <label>Subcategoría</label>
         <select
           value={subcategoria ?? ""}
-          onChange={(e) => setSubcategoria(Number(e.target.value))}
+          onChange={(e) =>
+            setSubcategoria(e.target.value ? Number(e.target.value) : null)
+          }
           disabled={!categoria || subcategoriasDisponibles.length === 0}
         >
           <option value="">Selecciona...</option>

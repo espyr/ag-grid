@@ -26,26 +26,23 @@ export const useDocumentationCategories = ({
     Option[]
   >([]);
 
-  // Load categories
+  // Load categories when tipificacion changes
   useEffect(() => {
-    if (tipificacion === null) {
+    if (tipificacion == null) {
       setCategoriasDisponibles([]);
+      setSubcategoriasDisponibles([]);
       setCategoria(null);
       setSubcategoria(null);
-      setSubcategoriasDisponibles([]);
       return;
     }
 
     const cats = categoriaOptions[tipificacion] ?? [];
     setCategoriasDisponibles(cats);
-    setCategoria(null);
-    setSubcategoria(null);
-    setSubcategoriasDisponibles([]);
   }, [tipificacion]);
 
-  // Load subcategories
+  // Load subcategories when categoria changes
   useEffect(() => {
-    if (categoria === null) {
+    if (categoria == null) {
       setSubcategoriasDisponibles([]);
       setSubcategoria(null);
       return;
@@ -53,7 +50,6 @@ export const useDocumentationCategories = ({
 
     const subs = subcategoriaOptions[categoria] ?? [];
     setSubcategoriasDisponibles(subs);
-    setSubcategoria(null);
   }, [categoria]);
 
   return {

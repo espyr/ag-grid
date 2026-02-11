@@ -112,12 +112,13 @@ export const DataTable: React.FC<Props> = ({
       console.log("Data refreshed:", normalizedData);
       setRowData(normalizedData);
     } catch (err) {
-      console.error("refreshData error:", err);
+      console.error("refreshData error:");
     }
   }, []);
 
   const updateRevisado = async (id: string, revisado: boolean) => {
     const payload = rowData?.find((row) => row.osp_documentacionid === id);
+    console.log("Updating revisado for id:", id, payload);
     if (!payload) {
       toast.error("No se encontró el registro");
       return;
@@ -138,7 +139,6 @@ export const DataTable: React.FC<Props> = ({
       toast.success("Revisado editado con éxito");
       await refreshData();
     } catch (err) {
-      console.error("Edit failed:", err);
       toast.error("Error al editar el revisado");
     }
   };

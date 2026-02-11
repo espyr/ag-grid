@@ -29,11 +29,10 @@ export const ReeplaceFileModal = ({
       onClose();
       console.log("Uploading with payload:", payload);
       const res = await window.parent!.formApi!.uploadFile(payload);
-      if (!res.ok) throw new Error("HTTP error");
+      if (res && res !== "OK") throw new Error("HTTP error");
       toast.success("Archivo subido con éxito", { id: toastId });
       await refreshData?.();
     } catch (err) {
-      console.error("Upload failed:", err);
       toast.error("Error al subir el archivo", { id: toastId });
       onClose();
     }
@@ -65,7 +64,14 @@ export const ReeplaceFileModal = ({
 
   return (
     <DocumentationModal onClose={onClose} className={styles.modalContent}>
-      <h3 style={{ margin: 0 }}>Actualizar Archivo:</h3>
+      <h3
+        style={{
+          margin: 0,
+          fontFamily: "initial",
+        }}
+      >
+        Actualizar Archivo:
+      </h3>
       <span>{rowData?.osp_nombre}</span>
 
       <FileUploader

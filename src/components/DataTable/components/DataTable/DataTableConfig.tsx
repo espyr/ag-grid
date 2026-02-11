@@ -73,8 +73,16 @@ export const documentationColumns = (
     minWidth: 80,
     resizable: true,
     editable: true,
+
+    cellRenderer: "agCheckboxCellRenderer",
+    cellEditor: "agCheckboxCellEditor",
+
     cellStyle: { justifyContent: "center", display: "flex" },
+
+    valueGetter: ({ data }) => !!data?.osp_validadocontratacion,
+
     getQuickFilterText: () => "",
+
     onCellValueChanged: (params) => {
       updateRevisado(params.data.osp_documentacionid, params.newValue);
     },

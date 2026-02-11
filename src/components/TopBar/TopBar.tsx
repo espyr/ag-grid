@@ -3,6 +3,7 @@ import styles from "./TopBar.module.css";
 import { useEffect, useState } from "react";
 import { UploadModal } from "../DataTable/Modals/UploadModal/UploadModal";
 import { RawDataItem } from "../../types/data";
+import { toast } from "react-hot-toast";
 
 export const TopBar: React.FC<{
   selectedRows?: RawDataItem[];
@@ -20,13 +21,12 @@ export const TopBar: React.FC<{
     try {
       for (const item of selectedRows) {
         window.open(item.osp_link, "_blank", "noreferrer");
-
         // wait 500 ms before next
         await new Promise((resolve) => setTimeout(resolve, 300));
       }
     } catch (error) {
-      console.error("Open links failed:", error);
-      alert("No se pudieron abrir los archivos.");
+      console.error("Open links failed:");
+      toast.error("No se pudieron abrir los archivos.");
     }
   };
 
@@ -40,7 +40,7 @@ export const TopBar: React.FC<{
         if (mounted) setIsAdmin(Boolean(result));
       } catch (err) {
         setIsAdmin(false);
-        console.error("Failed to check admin status", err);
+        console.error("Failed to check admin status");
       }
     };
     checkAdmin();
@@ -48,12 +48,22 @@ export const TopBar: React.FC<{
       mounted = false;
     };
   }, []);
-  const uploadFile = () => {
-    setIsOpenModal(true);
-  };
+
   const deleteFiles = async () => {
     console.log("Eliminar ficheros seleccionados");
     console.log(selectedRows);
+    const selectedRowsIds =
+      selectedRows?.map((row) => row.osp_documentacionid) || [];
+    try {
+      const res = await window.parent!.formApi!.deleteRecord(selectedRowsIds);
+      if (res && res === "OK") {
+        toast.success("Ficheros eliminados correctamente");
+      } else {
+        toast.error("Error al eliminar los ficheros");
+      }
+    } catch (err) {
+      toast.error("Error al eliminar los ficheros");
+    }
     console.log("refreshData called");
     await refreshData?.();
   };
@@ -76,11 +86,10 @@ export const TopBar: React.FC<{
 
     try {
       const sharePointLink = await window.parent!.formApi!.getUrlSharepoint();
-
       newWindow.location.href = sharePointLink;
     } catch (err) {
       newWindow.close();
-      console.error("Failed to get SharePoint link", err);
+      console.log("Failed to get SharePoint link");
     }
   };
 
@@ -90,7 +99,7 @@ export const TopBar: React.FC<{
         {!isButtonVisible && (
           <button
             className={styles.secondaryButton}
-            onClick={() => uploadFile()}
+            onClick={() => setIsOpenModal(true)}
           >
             <Icon iconName="CloudUpload" />
             Subir Fichero

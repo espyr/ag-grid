@@ -63,7 +63,7 @@ export const UploadModal = ({
       toast.success("El fichero se ha subido correctamente", { id: toastId });
       await refreshData?.();
     } catch (err) {
-      console.error("Upload failed:", err);
+      console.error("Upload failed:");
       toast.error("Error al subir el archivo", { id: toastId });
     } finally {
       setLoading(false);
@@ -92,8 +92,9 @@ export const UploadModal = ({
       subcategoria,
       fileName: file.name,
       fileBase64: base64.split(",")[1],
+      documentacionId: existingFileId!,
     };
-
+    console.log("Submitting with payload:", payload);
     await uploadFile(payload);
   };
 
@@ -113,7 +114,7 @@ export const UploadModal = ({
       subcategoria,
       fileName: pendingFile.name,
       contentType: pendingFile.type,
-      base64: pendingBase64.split(",")[1],
+      fileBase64: pendingBase64.split(",")[1],
       documentacionId: existingFileId!,
     };
 

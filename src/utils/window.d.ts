@@ -26,6 +26,7 @@ declare global {
       revisado?: boolean;
     }): Promise<res>;
     isAdmin(): Promise<boolean>;
+    deleteRecord(documentacionIds: string[]): Promise<res>;
   }
 
   interface Window {

@@ -32,16 +32,17 @@ export const FileUploader = ({
       reader.onerror = reject;
     });
 
-  const checkIfFileExists = async (fileName: string) => {
+  const checkIfFileExists = async (fileName: string): Promise<boolean> => {
     try {
       const res = await window.parent!.formApi!.isFileExist(fileName);
-      if (res && setExistingFileId && res !== "") {
+      const exists = typeof res === "string" && res.length > 0;
+      if (exists && setExistingFileId) {
         setExistingFileId(res);
       }
-      return res === "" ? false : true;
+      return exists;
     } catch (err) {
-      console.error("Error al verificar existencia del archivo:", err);
       toast.error("Error al verificar existencia del archivo");
+      return false;
     }
   };
 
@@ -51,10 +52,11 @@ export const FileUploader = ({
     setFile(selectedFile);
     setBase64(encoded);
     setErrors({ ...errors, file: "" });
-
-    const exists = onFileExists && (await checkIfFileExists(selectedFile.name));
+    let exists = false;
+    if (onFileExists) {
+      exists = await checkIfFileExists(selectedFile.name);
+    }
     setLoading(false);
-
     if (exists && onFileExists) {
       onFileExists(selectedFile, encoded);
     }

@@ -7,10 +7,8 @@ export const getTextByKey = (
   keyToFind: number,
 ): string | undefined => {
   for (const opciones of Object.values(listOfOptions)) {
-    console.log(`Searching for key ${keyToFind} in options:`, opciones);
     const found = opciones.find((opt) => opt.key === keyToFind);
     if (found) {
-      console.log(`Found text for key ${keyToFind}: ${found.text}`);
       return found.text;
     }
   }
