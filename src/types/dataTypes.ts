@@ -59,5 +59,6 @@ export interface ColumnConfig {
   type: "text" | "date" | "boolean";
   isSet: boolean;
   override?: Partial<ColDef>;
+  hasOptions: boolean;
 }
 export type Mode = "account" | "opportunity";

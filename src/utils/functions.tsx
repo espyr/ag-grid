@@ -1,4 +1,5 @@
 import moment from "moment";
+import type { DoesFilterPassParams } from "ag-grid-community";
 
 export const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
@@ -35,3 +36,14 @@ export function groupByParent(list: any[], parentField: string) {
     {} as Record<number, any[]>,
   );
 }
+export const doesFilterPass = ({
+  model,
+  node,
+  handlerParams,
+}: DoesFilterPassParams<any, any, string[] | null>) => {
+  if (!model || model.length === 0) return true;
+
+  const value = handlerParams.getValue(node);
+
+  return model.includes(value);
+};

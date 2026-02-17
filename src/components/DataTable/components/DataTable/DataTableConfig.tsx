@@ -1,13 +1,19 @@
 import { ColDef } from "ag-grid-enterprise";
 import { ColumnConfig } from "../../../../types/dataTypes";
-import { formatDate } from "../../../../utils/functions";
-import { NombreCellRenderer } from "../../../../renders/NombreCellRenderer";
+import { doesFilterPass, formatDate } from "../../../../utils/functions";
+import { OptionsCellRenderer } from "../../../../renders/OptionsCellRenderer";
+import SetFilter from "./SetFilter";
 
 const buildTextColumn = (c: ColumnConfig): ColDef => ({
   field: c.field,
   headerName: c.headerName,
   minWidth: 150,
-  filter: c.isSet ? "agSetColumnFilter" : "agTextColumnFilter",
+  filter: c.isSet
+    ? { component: SetFilter, doesFilterPass: doesFilterPass }
+    : "agTextColumnFilter",
+  filterParams: {
+    useForm: true,
+  },
   resizable: true,
   getQuickFilterText: () => "",
 });
@@ -63,7 +69,7 @@ export function buildColumnsFromConfig(
     refreshData?: () => Promise<void>;
   },
 ): ColDef[] {
-  return configs.map((c, index) => {
+  return configs.map((c) => {
     let base: ColDef;
 
     switch (c.type) {
@@ -84,11 +90,11 @@ export function buildColumnsFromConfig(
     }
 
     // ✅ special behavior for first column only
-    if (index === 0 && opts?.refreshData) {
+    if (c.hasOptions && opts?.refreshData) {
       base = {
         ...base,
         minWidth: 200,
-        cellRenderer: NombreCellRenderer,
+        cellRenderer: OptionsCellRenderer,
         cellRendererParams: {
           refreshData: opts.refreshData,
         },

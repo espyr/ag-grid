@@ -11,6 +11,7 @@ import {
   type ColDef,
   type GetRowIdFunc,
   ModuleRegistry,
+  CustomFilterModule,
 } from "ag-grid-community";
 
 import "ag-grid-community/styles/ag-grid.css";
@@ -22,7 +23,6 @@ import { RawDataItem } from "../../../../types/dataTypes";
 import styles from "./DataTable.module.css";
 import { TopBar } from "../../../TopBar/TopBar";
 import { useDataTable } from "./DataTableContext";
-import { SetFilterModule } from "ag-grid-enterprise";
 export interface Props {
   gridTheme?: string;
   isDarkMode?: boolean;
@@ -35,7 +35,6 @@ ModuleRegistry.registerModules([
   ClientSideRowModelModule,
   TextFilterModule,
   DateFilterModule,
-  SetFilterModule,
 ]);
 export const formatearFecha = (fecha: string) => {
   const parsedDate = parseISO(fecha);
@@ -52,12 +51,10 @@ export const DataTable: React.FC<Props> = ({
   const [selectedRows, setSelectedRows] = useState<RawDataItem[]>([]);
 
   const gridRef = useRef<AgGridReact>(null);
-
   const defaultColDef = useMemo<ColDef>(
     () => ({
       flex: 1,
       sortable: true,
-      filter: true,
       resizable: true,
       cellStyle: { justifyContent: "center" },
       enableCellChangeFlash: true,
@@ -94,6 +91,7 @@ export const DataTable: React.FC<Props> = ({
       />
 
       <AgGridReact
+        modules={[CustomFilterModule]}
         theme="legacy"
         ref={gridRef}
         onGridReady={() => {
@@ -127,6 +125,7 @@ export const DataTable: React.FC<Props> = ({
           enableClickSelection: false,
         }}
         domLayout="autoHeight"
+        enableFilterHandlers={true}
       />
     </div>
   );

@@ -1,45 +1,317 @@
-# AG Grid Finance Demo (React + TypeScript + Vite)
+# Enterprise Generic DataTable (AG Grid + React + Dynamic Config)
 
-The [AG Grid Finance Demo](https://ag-grid.com/example-finance/) in React.js.
+## Overview
 
-## Getting Started
+This is a fully generic, enterprise‑grade DataTable component built
+with:
 
-1. Get a copy of this folder using [degit](https://github.com/Rich-Harris/degit) (without the git respository files):
+- React
+- AG Grid
+- Context API
+- Dynamic backend‑driven column configuration
+- Fully reusable architecture
 
-   ```
-   npx degit ag-grid/ag-grid-demos/finance/react ag-grid-finance-example-react
-   cd ag-grid-finance-example-react
-   ```
+Supports any entity like:
 
-   Alternatively, you can get the files using `git clone`:
+- account
+- opportunity
+- custom entities
 
-   ```
-   git clone git@github.com:ag-grid/ag-grid-demos.git
-   cd ag-grid-demos/finance/react
-   ```
+Without changing frontend code.
 
-2. Install dependencies: `npm install`
-3. Run the dev server: `npm run dev`
+---
 
-## How It Was Built
+# Architecture Diagram
 
-This example code was generated with the [Vite React Typescript template](https://vitejs.dev/guide/) using:
+    Backend (formApi)
+       │
+       ├── getEntidad()
+       ├── getColumns()
+       ├── getDocumentacionData()
+       └── updateRecord()
+       │
+       ▼
+    DataTableProvider (Context)
+       │
+       ├── loads mode
+       ├── loads columns config
+       ├── loads options
+       ├── loads row data
+       │
+       ▼
+    buildColumnsFromConfig()
+       │
+       ▼
+    DataTable (AG Grid)
+       │
+       ├── render columns
+       ├── render rows
+       ├── editing
+       ├── filtering
+       └── pagination
 
+---
+
+# Installation
+
+```bash
+npm install ag-grid-community ag-grid-react ag-grid-enterprise
+npm install react-hot-toast
+npm install date-fns date-fns-tz
 ```
-npm create vite@latest finance/react -- --template react-ts
 
-# With the addition of the following modules
-npm i ag-charts-enterprise ag-grid-enterprise ag-grid-react
+---
+
+# Basic Usage
+
+## Wrap your component
+
+```tsx
+<DataTableProvider>
+  <DataTable />
+</DataTableProvider>
 ```
 
-<br /><br />
+---
 
-## Support
+# Backend Requirements (formApi)
 
-### Enterprise Support
+Must expose:
 
-AG Grid Enterprise customers have access to dedicated support via [ZenDesk](https://ag-grid.zendesk.com/hc/en-us), which is monitored by our engineering teams.
+```ts
+window.parent.formApi = {
 
-### Bug Reports
+  async getEntidad() {
+     return "account"
+  },
 
-If you have found a bug, please report it in our main repository's [issues](https://github.com/ag-grid/ag-grid/issues) section.
+  async getColumns(entidad) {
+     return ColumnConfig[]
+  },
+
+  async getDocumentacionData() {
+     return []
+  },
+
+  async updateRecord(payload) {
+     return "OK"
+  },
+
+  async getOptionSet(field, entity) {
+     return {}
+  }
+}
+```
+
+---
+
+# ColumnConfig Definition
+
+CONFIG
+↓
+buildTextColumn / buildDateColumn / buildBooleanColumn
+↓
+AG-Grid ColDef
+↓
+render en tabla
+
+field: Es la propiedad del objeto rowData.
+headerName: Es el texto visible en la cabecera.
+type: Define cómo se construye la columna. (buildTextColumn/buildDateColumn/buildBooleanColumn)
+isSet: Activa filtro tipo SetFilter, filtro por opciones sino sera por texto libre
+hasOptions: Activa menu con opciones
+
+```ts
+interface ColumnConfig {
+  field: string;
+
+  headerName: string;
+
+  type: "text" | "date" | "boolean";
+
+  isSet?: boolean;
+
+  hasOptions: boolean;
+
+  override?: Partial<ColDef>;
+}
+```
+
+---
+
+# Example Backend ColumnConfig
+
+```ts
+return [
+ {
+   field: "osp_nombre",
+   headerName: "Nombre",
+   type: "text",
+   hasOptions: true
+ },
+ {
+   field: "createdon",
+   headerName: "Fecha creación",
+   type: "date"
+ },
+ {
+   field: "osp_revisado",
+   headerName: "Revisado",
+   type: "boolean"
+ ,
+ {
+    field: "osp_tipificacion",
+    headerName: "Tipificacion",
+    type: "text",
+    isSet:true
+  },
+}
+]
+```
+
+---
+
+# Features
+
+## Automatic
+
+- column generation
+- filters
+- sorting
+- pagination
+- editing
+- refresh
+
+## Smart rendering
+
+Automatically uses:
+
+- checkbox for boolean
+- date formatter
+- custom renderer support
+
+---
+
+# Using Context
+
+```ts
+const { columns, rowData, refreshData, options, mode } = useDataTable();
+```
+
+---
+
+# Custom Cell Renderer Example
+
+```ts
+{
+ field: "name",
+ cellRenderer: MyRenderer
+}
+```
+
+---
+
+# Refresh Data
+
+```ts
+await refreshData();
+```
+
+---
+
+# Storybook Example
+
+```tsx
+export const Default = () => (
+  <DataTableProvider>
+    <DataTable gridHeight={500} />
+  </DataTableProvider>
+);
+```
+
+---
+
+# Mock formApi Example
+
+```ts
+window.parent.formApi = {
+  getEntidad: async () => "account",
+
+  getColumns: async () => [
+    {
+      field: "name",
+      headerName: "Name",
+      type: "text",
+    },
+  ],
+
+  getDocumentacionData: async () => [
+    {
+      id: "1",
+      name: "Test",
+    },
+  ],
+
+  updateRecord: async () => "OK",
+};
+```
+
+---
+
+# Extend Example
+
+You can reuse this table for any entity:
+
+    users
+    documents
+    contracts
+    products
+    customers
+
+No frontend changes required.
+
+---
+
+# Enterprise Benefits
+
+- Fully reusable
+- Backend driven
+- Type safe
+- Scalable
+- Clean architecture
+- Separation of concerns
+
+---
+
+# Recommended Folder Structure
+
+    components/
+      DataTable/
+         DataTable.tsx
+         DataTableContext.tsx
+         DataTableConfig.ts
+
+    hooks/
+
+    renders/
+
+    types/
+
+    utils/
+
+---
+
+# Production Ready
+
+This architecture is safe for:
+
+- enterprise apps
+- CRM systems
+- dashboards
+- admin panels
+
+---
+
+# Author
+
+Enterprise reusable DataTable architecture

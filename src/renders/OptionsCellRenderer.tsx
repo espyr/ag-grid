@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import styles from "./NombreCellRenderer.module.css";
+import styles from "./OptionsCellRenderer.module.css";
 import { Icon } from "@fluentui/react";
 import { EditModal } from "../components/DataTable/Modals/EditModal/EditModal";
 import { ReeplaceFileModal } from "../components/DataTable/Modals/ReeplaceFileModal/ReeplaceFileModal";
@@ -12,7 +12,7 @@ interface Props {
   refreshData: () => Promise<void>;
 }
 
-export const NombreCellRenderer: React.FC<Props> = ({
+export const OptionsCellRenderer: React.FC<Props> = ({
   value,
   data,
   refreshData,
