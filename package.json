@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ag-grid-community/locale": "^35.1.0",
     "@fluentui/react": "^8.125.3",
     "ag-charts-enterprise": "11.0.0",
     "ag-grid-enterprise": "33.0.2",

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { categoriaOptions, subcategoriaOptions } from "./dataOptions";
+import { useDataTable } from "../components/DataTable/components/DataTable/DataTableContext";
 
 export interface Option {
   key: number;
@@ -16,8 +16,6 @@ interface Params {
 export const useDocumentationCategories = ({
   tipificacion,
   categoria,
-  setCategoria,
-  setSubcategoria,
 }: Params) => {
   const [categoriasDisponibles, setCategoriasDisponibles] = useState<Option[]>(
     [],
@@ -25,32 +23,30 @@ export const useDocumentationCategories = ({
   const [subcategoriasDisponibles, setSubcategoriasDisponibles] = useState<
     Option[]
   >([]);
+  const { options } = useDataTable();
 
   // Load categories when tipificacion changes
   useEffect(() => {
-    if (tipificacion == null) {
+    if (tipificacion == null || !options.categorias) {
       setCategoriasDisponibles([]);
       setSubcategoriasDisponibles([]);
-      setCategoria(null);
-      setSubcategoria(null);
       return;
     }
 
-    const cats = categoriaOptions[tipificacion] ?? [];
+    const cats = options.categorias[tipificacion] ?? [];
     setCategoriasDisponibles(cats);
-  }, [tipificacion]);
+  }, [tipificacion, options.categorias]);
 
   // Load subcategories when categoria changes
   useEffect(() => {
-    if (categoria == null) {
+    if (categoria == null || !options.subcategorias) {
       setSubcategoriasDisponibles([]);
-      setSubcategoria(null);
       return;
     }
 
-    const subs = subcategoriaOptions[categoria] ?? [];
+    const subs = options.subcategorias[categoria] ?? [];
     setSubcategoriasDisponibles(subs);
-  }, [categoria]);
+  }, [categoria, options.subcategorias]);
 
   return {
     categoriasDisponibles,

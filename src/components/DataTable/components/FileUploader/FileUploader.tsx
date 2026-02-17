@@ -7,7 +7,6 @@ interface FileUploaderProps {
   setBase64: (base64: string | null) => void;
   errors: { [key: string]: string } | null;
   setErrors: (errors: { [key: string]: string } | null) => void;
-  setLoading: (loading: boolean) => void;
   onFileExists?: (file: File, base64: string) => void;
   setExistingFileId?: (id: string | null) => void;
 }
@@ -18,7 +17,6 @@ export const FileUploader = ({
   setBase64,
   errors,
   setErrors,
-  setLoading,
   onFileExists,
   setExistingFileId,
 }: FileUploaderProps) => {
@@ -34,12 +32,11 @@ export const FileUploader = ({
 
   const checkIfFileExists = async (fileName: string): Promise<boolean> => {
     try {
-      const res = await window.parent!.formApi!.isFileExist(fileName);
-      const exists = typeof res === "string" && res.length > 0;
-      if (exists && setExistingFileId) {
-        setExistingFileId(res);
+      const exists = await window.parent!.formApi!.isFileExist(fileName);
+      if (exists && setExistingFileId && exists !== "") {
+        setExistingFileId(exists);
       }
-      return exists;
+      return exists !== "" ? true : false;
     } catch (err) {
       toast.error("Error al verificar existencia del archivo");
       return false;
@@ -47,7 +44,6 @@ export const FileUploader = ({
   };
 
   const handleFile = async (selectedFile: File) => {
-    setLoading(true);
     const encoded = await fileToBase64(selectedFile);
     setFile(selectedFile);
     setBase64(encoded);
@@ -56,7 +52,6 @@ export const FileUploader = ({
     if (onFileExists) {
       exists = await checkIfFileExists(selectedFile.name);
     }
-    setLoading(false);
     if (exists && onFileExists) {
       onFileExists(selectedFile, encoded);
     }

@@ -1,6 +1,6 @@
 import styles from "./ReplaceConfirmationModal.module.css";
 interface ReplaceConfirmationModalProps {
-  confirmReplace: () => Promise<void>;
+  confirmReplace: () => void;
   setShowReplaceConfirmationModal: (show: boolean) => void;
   setPendingFile: (file: File | null) => void;
   setPendingBase64: (base64: string | null) => void;
@@ -17,7 +17,13 @@ export const ReplaceConfirmationModal = ({
     setShowReplaceConfirmationModal(false);
     setPendingFile(null);
     setPendingBase64(null);
-    setIsOpenModal(true);
+    setIsOpenModal(false);
+  };
+  const handleConfirm = () => {
+    confirmReplace();
+    setPendingFile(null);
+    setPendingBase64(null);
+    setShowReplaceConfirmationModal(false);
   };
   return (
     <div className={styles.replaceConfirmationModal}>
@@ -27,7 +33,7 @@ export const ReplaceConfirmationModal = ({
       </p>
 
       <div className={styles.buttonGroup}>
-        <button className={styles.primaryBtn} onClick={confirmReplace}>
+        <button className={styles.primaryBtn} onClick={handleConfirm}>
           Sí, reemplazar
         </button>
         <button className={styles.secondaryBtn} onClick={onCancel}>

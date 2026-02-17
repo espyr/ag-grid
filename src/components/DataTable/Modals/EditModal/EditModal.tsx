@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { RawDataItem } from "../../../../types/data";
+import { useEffect, useRef, useState } from "react";
+import { RawDataItem } from "../../../../types/dataTypes";
 import styles from "./EditModal.module.css";
-import { tipificacionOptions } from "../../../../utils/dataOptions";
 import { toast } from "react-hot-toast";
 import { useDocumentationCategories } from "../../../../utils/useDocumentationCategories";
 import { DocumentationModal } from "../../../DocumentationModal/DocumentationModal";
+import { useDataTable } from "../../components/DataTable/DataTableContext";
 
 interface EditFilePayload {
   documentacionId: string;
@@ -24,25 +24,24 @@ export const EditModal = ({
 }: {
   rowData: RawDataItem;
   onClose: () => void;
-  refreshData?: () => Promise<void>;
+  refreshData: () => Promise<void>;
 }) => {
   const [descripcion, setDescripcion] = useState(rowData.osp_descripcion ?? "");
   const [nombre, setNombre] = useState(rowData.osp_nombre ?? "");
+  const { options, mode } = useDataTable();
 
   const [tipificacion, setTipificacion] = useState<number | null>(
-    rowData.osp_tipificacion ?? null,
+    rowData.osp_tipificacionValue ?? null,
   );
 
   const [categoria, setCategoria] = useState<number | null>(
-    rowData.osp_categoria ?? null,
+    rowData.osp_categoriaValue ?? null,
   );
 
   const [subcategoria, setSubcategoria] = useState<number | null>(
-    rowData.osp_subcategoria ?? null,
+    rowData.osp_subcategoriaValue ?? null,
   );
-
   const [errors, setErrors] = useState<Record<string, string> | null>(null);
-
   const { categoriasDisponibles, subcategoriasDisponibles } =
     useDocumentationCategories({
       tipificacion,
@@ -50,9 +49,14 @@ export const EditModal = ({
       setCategoria,
       setSubcategoria,
     });
-
   // Reset subcategoria when categoria changes
+  const firstLoadRef = useRef(true);
+
   useEffect(() => {
+    if (firstLoadRef.current) {
+      firstLoadRef.current = false;
+      return;
+    }
     setSubcategoria(null);
   }, [categoria]);
 
@@ -61,10 +65,12 @@ export const EditModal = ({
     try {
       onClose();
       const res = await window.parent!.formApi!.updateRecord(payload);
-      console.log("Edit response:", res);
-      if (res && res !== "OK") throw new Error("HTTP error");
-      toast.success("Registro editado con éxito", { id: toastId });
-      await refreshData?.();
+      if (res && res === "OK") {
+        toast.success("Registro editado con éxito", { id: toastId });
+        await refreshData();
+      } else {
+        toast.error("Error al editar el registro", { id: toastId });
+      }
     } catch (err) {
       toast.error("Error al editar el registro", { id: toastId });
     }
@@ -103,7 +109,7 @@ export const EditModal = ({
           }}
         >
           <option value="">Selecciona...</option>
-          {tipificacionOptions.map((opt) => (
+          {options.tipificaciones.map((opt) => (
             <option key={opt.key} value={opt.key}>
               {opt.text}
             </option>
@@ -114,37 +120,41 @@ export const EditModal = ({
           <span className={styles.error}>{errors.tipificacion}</span>
         )}
 
-        <label>Categoría</label>
-        <select
-          value={categoria ?? ""}
-          onChange={(e) =>
-            setCategoria(e.target.value ? Number(e.target.value) : null)
-          }
-          disabled={!tipificacion || categoriasDisponibles.length === 0}
-        >
-          <option value="">Selecciona...</option>
-          {categoriasDisponibles.map((opt) => (
-            <option key={opt.key} value={opt.key}>
-              {opt.text}
-            </option>
-          ))}
-        </select>
+        {mode === "opportunity" && <label>Categoría</label>}
+        {mode === "opportunity" && (
+          <select
+            value={categoria ?? ""}
+            onChange={(e) =>
+              setCategoria(e.target.value ? Number(e.target.value) : null)
+            }
+            disabled={!tipificacion || categoriasDisponibles.length === 0}
+          >
+            <option value="">Selecciona...</option>
+            {categoriasDisponibles.map((opt) => (
+              <option key={opt.key} value={opt.key}>
+                {opt.text}
+              </option>
+            ))}
+          </select>
+        )}
 
-        <label>Subcategoría</label>
-        <select
-          value={subcategoria ?? ""}
-          onChange={(e) =>
-            setSubcategoria(e.target.value ? Number(e.target.value) : null)
-          }
-          disabled={!categoria || subcategoriasDisponibles.length === 0}
-        >
-          <option value="">Selecciona...</option>
-          {subcategoriasDisponibles.map((opt) => (
-            <option key={opt.key} value={opt.key}>
-              {opt.text}
-            </option>
-          ))}
-        </select>
+        {mode === "opportunity" && <label>Subcategoría</label>}
+        {mode === "opportunity" && (
+          <select
+            value={subcategoria ?? ""}
+            onChange={(e) =>
+              setSubcategoria(e.target.value ? Number(e.target.value) : null)
+            }
+            disabled={!categoria || subcategoriasDisponibles.length === 0}
+          >
+            <option value="">Selecciona...</option>
+            {subcategoriasDisponibles.map((opt) => (
+              <option key={opt.key} value={opt.key}>
+                {opt.text}
+              </option>
+            ))}
+          </select>
+        )}
 
         <label>Descripción</label>
         <textarea

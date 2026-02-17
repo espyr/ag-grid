@@ -1,4 +1,4 @@
-import { RawDataItem } from "../types/data";
+import { Mode, RawDataItem } from "../types/dataTypes";
 
 export {};
 
@@ -27,6 +27,10 @@ declare global {
     }): Promise<res>;
     isAdmin(): Promise<boolean>;
     deleteRecord(documentacionIds: string[]): Promise<res>;
+    getEntidad(): Promise<Mode>;
+    getOptionSet(nombreCampo: string, entidad: string): Promise<any>;
+    getValidado(): Promise<boolean>;
+    getColumns(entidad: string): Promise<ColumnConfig[]>;
   }
 
   interface Window {

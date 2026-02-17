@@ -4,12 +4,12 @@ import styles from "./NombreCellRenderer.module.css";
 import { Icon } from "@fluentui/react";
 import { EditModal } from "../components/DataTable/Modals/EditModal/EditModal";
 import { ReeplaceFileModal } from "../components/DataTable/Modals/ReeplaceFileModal/ReeplaceFileModal";
-import { RawDataItem } from "../types/data";
+import { RawDataItem } from "../types/dataTypes";
 
 interface Props {
   value: string;
   data: RawDataItem;
-  refreshData?: () => Promise<void>;
+  refreshData: () => Promise<void>;
 }
 
 export const NombreCellRenderer: React.FC<Props> = ({
@@ -24,20 +24,17 @@ export const NombreCellRenderer: React.FC<Props> = ({
   const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(
     null,
   );
-
-  const isFilePT = data.osp_tipificacion === 863920001;
+  const isFilePT = data.osp_tipificacionValue === 863920001;
   const buttonRef = useRef<HTMLButtonElement>(null);
   const onLinkClick = (e: React.MouseEvent) => {
     e.preventDefault();
     window.open(data.osp_link, "_blank");
   };
   const handleEdit = () => {
-    console.log("Editar clicked", data.osp_documentacionid);
     setOptionsOpen(false);
     setEditOpen(true);
   };
   const handleRefresh = () => {
-    console.log("Actualizar fichero clicked", data.osp_documentacionid);
     setOptionsOpen(false);
     setRefreshOpen(true);
   };
@@ -111,7 +108,6 @@ export const NombreCellRenderer: React.FC<Props> = ({
           <ReeplaceFileModal
             rowData={rowData}
             onClose={() => setRefreshOpen(false)}
-            refreshData={refreshData}
           />,
           document.body,
         )}
@@ -148,7 +144,7 @@ export const NombreCellRenderer: React.FC<Props> = ({
                 }}
               >
                 <Icon iconName="Refresh" />
-                Actualizar fichero
+                Reemplazar fichero
               </div>
             )}
           </div>,

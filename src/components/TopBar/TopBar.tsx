@@ -2,15 +2,17 @@ import { Icon } from "@fluentui/react";
 import styles from "./TopBar.module.css";
 import { useEffect, useState } from "react";
 import { UploadModal } from "../DataTable/Modals/UploadModal/UploadModal";
-import { RawDataItem } from "../../types/data";
+import { RawDataItem } from "../../types/dataTypes";
 import { toast } from "react-hot-toast";
+import { useDataTable } from "../DataTable/components/DataTable/DataTableContext";
+import { waitForFormApi } from "../../utils/functions";
 
 export const TopBar: React.FC<{
   selectedRows?: RawDataItem[];
   quickFilterText: string;
   setQuickFilterText: (text: string) => void;
-  refreshData?: () => Promise<void>;
-}> = ({ selectedRows, quickFilterText, setQuickFilterText, refreshData }) => {
+}> = ({ selectedRows, quickFilterText, setQuickFilterText }) => {
+  const { refreshData } = useDataTable();
   const isButtonVisible = selectedRows && selectedRows.length > 0;
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
@@ -25,7 +27,6 @@ export const TopBar: React.FC<{
         await new Promise((resolve) => setTimeout(resolve, 300));
       }
     } catch (error) {
-      console.error("Open links failed:");
       toast.error("No se pudieron abrir los archivos.");
     }
   };
@@ -33,14 +34,14 @@ export const TopBar: React.FC<{
   useEffect(() => {
     let mounted = true;
     const checkAdmin = async () => {
-      console.log("Checking admin status");
       try {
-        const result = await window.parent!.formApi!.isAdmin();
-        console.log("Admin status:", result);
-        if (mounted) setIsAdmin(Boolean(result));
+        waitForFormApi().then(async () => {
+          const result = await window.parent!.formApi!.isAdmin();
+          if (mounted) setIsAdmin(Boolean(result));
+        });
       } catch (err) {
         setIsAdmin(false);
-        console.error("Failed to check admin status");
+        toast.error("Failed to check admin status");
       }
     };
     checkAdmin();
@@ -50,8 +51,6 @@ export const TopBar: React.FC<{
   }, []);
 
   const deleteFiles = async () => {
-    console.log("Eliminar ficheros seleccionados");
-    console.log(selectedRows);
     const selectedRowsIds =
       selectedRows?.map((row) => row.osp_documentacionid) || [];
     try {
@@ -64,32 +63,24 @@ export const TopBar: React.FC<{
     } catch (err) {
       toast.error("Error al eliminar los ficheros");
     }
-    console.log("refreshData called");
     await refreshData?.();
   };
   const downloadFiles = () => {
-    // Lógica para descargar la documentación
-    console.log("Descargar documentación de ficheros seleccionados");
     handleBulkDownload();
-    console.log(selectedRows);
   };
   const openSharePoint = async (e: React.MouseEvent) => {
     e.preventDefault();
-
-    // MUST be sync
     const newWindow = window.open("", "_blank");
-
     if (!newWindow) {
-      console.error("Popup blocked");
+      toast.error("Popup blocked");
       return;
     }
-
     try {
       const sharePointLink = await window.parent!.formApi!.getUrlSharepoint();
       newWindow.location.href = sharePointLink;
     } catch (err) {
       newWindow.close();
-      console.log("Failed to get SharePoint link");
+      toast.error("Failed to get SharePoint link");
     }
   };
 
@@ -145,12 +136,7 @@ export const TopBar: React.FC<{
           }}
         />
       </div>
-      {isOpenModal && (
-        <UploadModal
-          setIsOpenModal={setIsOpenModal}
-          refreshData={refreshData}
-        />
-      )}
+      {isOpenModal && <UploadModal setIsOpenModal={setIsOpenModal} />}
     </div>
   );
 };

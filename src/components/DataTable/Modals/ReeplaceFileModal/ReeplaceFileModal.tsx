@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { FileUploader } from "../../components/FileUploader/FileUploader";
 import styles from "./ReeplaceFileModal.module.css";
-import { RawDataItem } from "../../../../types/data";
+import { RawDataItem } from "../../../../types/dataTypes";
 import { toast } from "react-hot-toast";
 import { UploadFilePayload } from "../UploadModal/UploadModal";
 import { DocumentationModal } from "../../../DocumentationModal/DocumentationModal";
+import { useDataTable } from "../../components/DataTable/DataTableContext";
 
 interface ErrorState {
   [key: string]: string;
@@ -13,21 +14,18 @@ interface ErrorState {
 export const ReeplaceFileModal = ({
   rowData,
   onClose,
-  refreshData,
 }: {
   rowData: RawDataItem | null;
   onClose: () => void;
-  refreshData?: () => Promise<void>;
 }) => {
   const [file, setFile] = useState<File | null>(null);
   const [base64, setBase64] = useState<string | null>(null);
   const [errors, setErrors] = useState<ErrorState | null>(null);
-
+  const { refreshData } = useDataTable();
   const uploadFile = async (payload: UploadFilePayload) => {
     const toastId = toast.loading("Subiendo fichero...");
     try {
       onClose();
-      console.log("Uploading with payload:", payload);
       const res = await window.parent!.formApi!.uploadFile(payload);
       if (res && res !== "OK") throw new Error("HTTP error");
       toast.success("Archivo subido con éxito", { id: toastId });
@@ -54,9 +52,9 @@ export const ReeplaceFileModal = ({
       fileName: file.name,
       fileBase64: base64.split(",")[1],
       descripcion: rowData?.osp_descripcion,
-      tipificacion: rowData?.osp_tipificacion,
-      categoria: rowData?.osp_categoria,
-      subcategoria: rowData?.osp_subcategoria,
+      tipificacionValue: rowData?.osp_tipificacionValue,
+      categoriaValue: rowData?.osp_categoriaValue,
+      subcategoriaValue: rowData?.osp_subcategoriaValue,
     };
 
     await uploadFile(payload);
@@ -70,7 +68,7 @@ export const ReeplaceFileModal = ({
           fontFamily: "initial",
         }}
       >
-        Actualizar Archivo:
+        Reemplazar Archivo:
       </h3>
       <span>{rowData?.osp_nombre}</span>
 
@@ -80,7 +78,6 @@ export const ReeplaceFileModal = ({
         setBase64={setBase64}
         errors={errors}
         setErrors={setErrors}
-        setLoading={() => {}}
       />
 
       <div className={styles.footer}>

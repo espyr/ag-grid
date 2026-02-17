@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { formatInTimeZone } from "date-fns-tz";
 import { parseISO } from "date-fns";
 import type { SelectionChangedEvent } from "ag-grid-community";
@@ -21,20 +15,19 @@ import {
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
+import { AG_GRID_LOCALE_ES } from "@ag-grid-community/locale";
 
 import { AgGridReact } from "ag-grid-react";
-import { RawDataItem } from "../../../../types/data";
+import { RawDataItem } from "../../../../types/dataTypes";
 import styles from "./DataTable.module.css";
 import { TopBar } from "../../../TopBar/TopBar";
-import { documentationColumns, cuentaColumns } from "./DataTableConfig";
-import { toast } from "react-hot-toast";
-import { sleep } from "../../../../utils/functions";
+import { useDataTable } from "./DataTableContext";
+import { SetFilterModule } from "ag-grid-enterprise";
 export interface Props {
   gridTheme?: string;
   isDarkMode?: boolean;
   gridHeight?: number | null;
   updateInterval?: number;
-  mode: "cuenta" | "documentacion";
 }
 
 ModuleRegistry.registerModules([
@@ -42,6 +35,7 @@ ModuleRegistry.registerModules([
   ClientSideRowModelModule,
   TextFilterModule,
   DateFilterModule,
+  SetFilterModule,
 ]);
 export const formatearFecha = (fecha: string) => {
   const parsedDate = parseISO(fecha);
@@ -52,107 +46,12 @@ export const DataTable: React.FC<Props> = ({
   gridTheme = "ag-theme-quartz",
   isDarkMode = false,
   gridHeight = null,
-  mode,
 }) => {
-  const [rowData, setRowData] = useState<RawDataItem[]>([]);
-  const hasLoadedRef = useRef(false);
-
-  useEffect(() => {
-    if (hasLoadedRef.current) return;
-    hasLoadedRef.current = true;
-
-    let cancelled = false;
-
-    const waitForFormApi = async () => {
-      console.log("Waiting for formApi...");
-      while (!window.parent?.formApi?.getDocumentacionData) {
-        console.log("formApi not ready yet, waiting...");
-        if (cancelled) return;
-        await new Promise((r) => setTimeout(r, 100));
-      }
-    };
-
-    const loadData = async () => {
-      try {
-        await waitForFormApi();
-        console.log("formApi is ready, loading data...");
-        const data = await window.parent!.formApi!.getDocumentacionData();
-        console.log("Data loaded:", data);
-        setRowData(data ?? []);
-      } catch (err) {
-        console.error("Data loading failed:");
-        setRowData([]);
-      } finally {
-        if (cancelled) return;
-      }
-    };
-
-    loadData();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
+  const { columns, rowData, refreshData } = useDataTable();
   const [quickFilterText, setQuickFilterText] = useState("");
   const [selectedRows, setSelectedRows] = useState<RawDataItem[]>([]);
 
   const gridRef = useRef<AgGridReact>(null);
-
-  const refreshData = useCallback(async () => {
-    try {
-      await sleep(1500);
-      const data = await window.parent.formApi.getDocumentacionData();
-
-      const normalizedData = data.map((row) => ({
-        ...row,
-        createdon: row.createdon ? new Date(row.createdon) : null,
-        modifiedon: row.modifiedon ? new Date(row.modifiedon) : null,
-      }));
-      console.log("Data refreshed:", normalizedData);
-      setRowData(normalizedData);
-    } catch (err) {
-      console.error("refreshData error:");
-    }
-  }, []);
-
-  const updateRevisado = async (id: string, revisado: boolean) => {
-    const payload = rowData?.find((row) => row.osp_documentacionid === id);
-    console.log("Updating revisado for id:", id, payload);
-    if (!payload) {
-      toast.error("No se encontró el registro");
-      return;
-    }
-    const newPayload = {
-      documentacionId: payload.osp_documentacionid,
-      descripcion: payload.osp_descripcion,
-      tipificacionValue: payload.osp_tipificacion,
-      categoriaValue: payload.osp_categoria,
-      subcategoriaValue: payload.osp_subcategoria,
-      fileName: payload.osp_nombre,
-      revisado: revisado,
-    };
-    console.log("Updating revisado with payload:", newPayload);
-    try {
-      const res = await window.parent!.formApi!.updateRecord(newPayload);
-      if (res && res !== "OK") throw new Error("HTTP error");
-      toast.success("Revisado editado con éxito");
-      await refreshData();
-    } catch (err) {
-      toast.error("Error al editar el revisado");
-    }
-  };
-  const colCuentaDefs = useMemo(
-    () => cuentaColumns(refreshData),
-    [refreshData],
-  );
-  const colDocumentationDefs =
-    mode === "documentacion"
-      ? useMemo(
-          () => documentationColumns(refreshData, updateRevisado),
-          [refreshData, updateRevisado],
-        )
-      : [];
 
   const defaultColDef = useMemo<ColDef>(
     () => ({
@@ -192,7 +91,6 @@ export const DataTable: React.FC<Props> = ({
         quickFilterText={quickFilterText}
         setQuickFilterText={setQuickFilterText}
         selectedRows={selectedRows}
-        refreshData={refreshData}
       />
 
       <AgGridReact
@@ -207,7 +105,7 @@ export const DataTable: React.FC<Props> = ({
           refreshData();
         }}
         rowData={rowData}
-        columnDefs={mode === "cuenta" ? colCuentaDefs : colDocumentationDefs}
+        columnDefs={columns}
         detailCellRendererParams={detailCellRendererParams}
         defaultColDef={defaultColDef}
         pagination={true}
@@ -222,6 +120,7 @@ export const DataTable: React.FC<Props> = ({
         )}
         paginationPageSizeSelector={false}
         onSelectionChanged={onSelectionChanged}
+        localeText={AG_GRID_LOCALE_ES}
         rowSelection={{
           mode: "multiRow",
           headerCheckbox: true,

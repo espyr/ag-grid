@@ -1,3 +1,5 @@
+import { ColDef } from "ag-grid-enterprise";
+
 export interface RawDataItem {
   "@odata.etag": string;
   modifiedon: string | null | Date;
@@ -8,14 +10,17 @@ export interface RawDataItem {
   _ownerid_value: string;
   osp_registro: string;
   _osp_oportunidad_value: string;
-  osp_tipificacion: number | null;
+  osp_tipificacion: string | null;
+  osp_tipificacionValue: number | null;
   osp_proyecto: boolean;
   osp_descripcion: string;
   osp_link: string;
-  osp_categoria: number | null;
+  osp_categoria: string | null;
+  osp_categoriaValue: number | null;
   _modifiedby: string;
   _modifiedby_value: string;
-  osp_subcategoria: number | null;
+  osp_subcategoria: string | null;
+  osp_subcategoriaValue: number | null;
   osp_validadocontratacion: boolean;
   osp_validadoordering: boolean;
   "_ownerid_value@OData.Community.Display.V1.FormattedValue"?: string;
@@ -48,3 +53,11 @@ export interface categoryType {
   key: number;
   text: string;
 }
+export interface ColumnConfig {
+  field: string;
+  headerName: string;
+  type: "text" | "date" | "boolean";
+  isSet: boolean;
+  override?: Partial<ColDef>;
+}
+export type Mode = "account" | "opportunity";
