@@ -84,7 +84,7 @@ export default function SetFilter(
         Todo
       </label>
       {values.map((value, index) => (
-        <label key={value} style={{ display: "block" }}>
+        <label key={value} style={{ display: "block", margin: "8px" }}>
           <input
             ref={index === 0 ? refFirst : undefined}
             type="checkbox"
