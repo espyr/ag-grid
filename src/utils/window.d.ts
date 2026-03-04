@@ -31,6 +31,10 @@ declare global {
     getOptionSet(nombreCampo: string, entidad: string): Promise<any>;
     getValidado(): Promise<boolean>;
     getColumns(entidad: string): Promise<ColumnConfig[]>;
+    isPlantillaButtonVisible(
+      selectedRows: RawDataItem[] | undefined,
+    ): Promise<boolean>;
+    enviarDatosCanvas(selectedRows: RawDataItem[]): Promise<res>;
   }
 
   interface Window {

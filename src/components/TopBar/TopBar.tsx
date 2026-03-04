@@ -16,7 +16,8 @@ export const TopBar: React.FC<{
   const isButtonVisible = selectedRows && selectedRows.length > 0;
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
-
+  const [isPlantillaButtonVisible, setIsPlantillaButtonVisible] =
+    useState<boolean>(false);
   const handleBulkDownload = async () => {
     if (!selectedRows?.length) return;
 
@@ -30,7 +31,22 @@ export const TopBar: React.FC<{
       toast.error("No se pudieron abrir los archivos.");
     }
   };
-
+  useEffect(() => {
+    const checkPlantillaButtonVisibility = async () => {
+      try {
+        const res =
+          await window.parent!.formApi!.isPlantillaButtonVisible(selectedRows);
+        if (res !== undefined) {
+          setIsPlantillaButtonVisible(res);
+        }
+      } catch (err) {
+        toast.error(
+          "Ha habido un error al comprobar la visibilidad del botón de plantilla",
+        );
+      }
+    };
+    checkPlantillaButtonVisibility();
+  }, [selectedRows]);
   useEffect(() => {
     let mounted = true;
     const checkAdmin = async () => {
@@ -49,7 +65,26 @@ export const TopBar: React.FC<{
       mounted = false;
     };
   }, []);
-
+  const generateTemplates = async () => {
+    {
+      if (!selectedRows || selectedRows.length === 0) {
+        toast.error("No hay filas seleccionadas");
+        return;
+      }
+      try {
+        const res =
+          await window.parent!.formApi!.enviarDatosCanvas(selectedRows);
+        if (res === "OK") {
+          toast.success("Plantillas generadas correctamente");
+        } else {
+          toast.error("Ha habido un error al generar las plantillas");
+        }
+      } catch (err) {
+        toast.error("Ha habido un error");
+      }
+    }
+    await refreshData?.();
+  };
   const deleteFiles = async () => {
     const selectedRowsIds =
       selectedRows?.map((row) => row.osp_documentacionid) || [];
@@ -94,6 +129,15 @@ export const TopBar: React.FC<{
           >
             <Icon iconName="CloudUpload" />
             Subir Fichero
+          </button>
+        )}
+        {isPlantillaButtonVisible && (
+          <button
+            className={styles.secondaryButton}
+            onClick={() => generateTemplates()}
+          >
+            <Icon iconName="Generate" />
+            Generar plantillas
           </button>
         )}
         {isButtonVisible && isAdmin && (

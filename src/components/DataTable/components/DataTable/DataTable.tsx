@@ -69,7 +69,6 @@ export const DataTable: React.FC<Props> = ({
   const onSelectionChanged = useCallback((event: SelectionChangedEvent) => {
     const selectedRows = event.api.getSelectedRows();
     setSelectedRows(selectedRows);
-    console.log(selectedRows);
   }, []);
   const detailCellRendererParams = useMemo(() => {
     return {

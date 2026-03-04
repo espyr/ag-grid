@@ -51,7 +51,6 @@ export const DataTableProvider: React.FC<{
   // -------------------------
 
   const refreshData = useCallback(async () => {
-    console.log("Refreshing data...");
     try {
       sleep(500); // Simula un retraso para esperar a que formApi esté listo
       await waitForFormApi();
@@ -61,7 +60,6 @@ export const DataTableProvider: React.FC<{
         createdon: r.createdon ? new Date(r.createdon) : null,
         modifiedon: r.modifiedon ? new Date(r.modifiedon) : null,
       }));
-      console.log("Data loaded:", normalized);
       setRowData(normalized);
     } catch (err) {
       toast.error("Data loading failed");

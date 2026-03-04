@@ -88,8 +88,6 @@ export function buildColumnsFromConfig(
       default:
         base = buildTextColumn(c);
     }
-
-    // ✅ special behavior for first column only
     if (c.hasOptions && opts?.refreshData) {
       base = {
         ...base,
