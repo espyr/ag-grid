@@ -34,10 +34,14 @@ export const TopBar: React.FC<{
   useEffect(() => {
     const checkPlantillaButtonVisibility = async () => {
       try {
-        const res =
-          await window.parent!.formApi!.isPlantillaButtonVisible(selectedRows);
-        if (res !== undefined) {
-          setIsPlantillaButtonVisible(res);
+        if (!selectedRows || selectedRows.length === 0) {
+          const res =
+            await window.parent!.formApi!.isPlantillaButtonVisible(
+              selectedRows,
+            );
+          if (res !== undefined) {
+            setIsPlantillaButtonVisible(res);
+          }
         }
       } catch (err) {
         toast.error(
